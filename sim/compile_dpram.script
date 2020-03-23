@@ -1,0 +1,6 @@
+ghdl -a --std=08 \
+../src/dpram.vhd \
+../tb/tb_pkg.vhd \
+../tb/tb_dpram.vhd
+
+ghdl -e --std=08 tb

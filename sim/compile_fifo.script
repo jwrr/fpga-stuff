@@ -1,0 +1,10 @@
+ghdl -a --std=08 \
+../src/dpram.vhd \
+../src/counter.vhd \
+../src/cdc_bin2gray.vhd \
+../src/cdc_gray2bin.vhd \
+../src/fifo.vhd \
+../tb/tb_pkg.vhd \
+../tb/tb_fifo.vhd
+
+ghdl -e --std=08 tb
