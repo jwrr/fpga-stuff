@@ -15,11 +15,20 @@ VHDL stands for Very High Speed Integrated Circuit Hardware Description
 Language. It's used for the design and development of FPGAs and ASICs.
 This repo contains some examples of basic building blocks.
 
-Prerequesites
+Prerequisites
 -------------
 
 This project uses the [GHDL](http://ghdl.free.fr/site/pmwiki.php) and the
 [GTK Wave](http://gtkwave.sourceforge.net/) waveform viewer.
+
+Get It
+------
+
+These examples are available on Github under the MIT License.
+
+<button class="favorite styled" type="button">
+  <a href="https://github.com/jwrr/vhdl_examples">Clone It</a>
+</button>
 
 How to Run
 ----------
