@@ -20,11 +20,11 @@
 
 ## ============================================================================
 ## FIXME
-title: Minima with Sidebar
+title: VHDL Examples
 email: jwrr.com@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   VHDL examples for FPGA and ASIC design.
-baseurl: "/vhdl-examples" # Use "" for your user page. Use "/projname" for project pages.
+baseurl: "/vhdl_examples" # Use "" for your user page. Use "/projname" for project pages.
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jwrr13
 github_username:  jwrr
