@@ -1,0 +1,5 @@
+ghdl -a --std=08 \
+../src/is_onehot.vhd \
+../tb/tb_is_onehot.vhd
+
+ghdl -e --std=08 tb

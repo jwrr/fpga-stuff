@@ -1,1 +1,4 @@
+
+# sudo apt install gtkwave
+
 gtkwave waves.vcd

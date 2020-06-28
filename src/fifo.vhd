@@ -7,13 +7,13 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+use ieee.std_logic_1164.all;
 use ieee.math_real.all;
 library work;
 
 entity fifo is
 generic (
-  DEPTH        : integer := 16;
+  DEPTH : integer := 16;
   WIDTH        : integer := 16;
   SAME_CLK     : boolean := false
 );
@@ -32,7 +32,7 @@ port (
   o_rlast    : out std_logic
 );
 end fifo;
-
+    -- here i am.
 architecture rtl of fifo is
   constant AWIDTH    : integer := integer(ceil(log2(real(DEPTH))));
   signal waddr       : std_logic_vector(AWIDTH-1 downto 0);

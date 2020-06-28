@@ -17,11 +17,14 @@ entity tb is
 end entity tb;
 
 architecture sim of tb is
-  constant CLK_PERIOD : time    := 10 ns;
   constant WIDTH      : integer := 16;
   constant WRAP_AT    : integer := 255;
 
-  signal clk          : std_logic;
+  constant CLK_PERIOD      : time := 10 ns;
+  constant CLK_HALF_PERIOD : time := CLK_PERIOD / 2;
+  signal   clk_en          : std_logic := '0';
+  signal   clk             : std_logic := '0';
+
   signal rst          : std_logic := '0';
   signal test_done    : std_logic := '0';
 
@@ -45,45 +48,59 @@ begin
   );
   -- end counter;
 
-  -- generate clocks until test_done is asserted
-  process
+
+
+  clk_en <= not test_done;
+  clkgen: process
   begin
-    clkgen(clk,test_done);
-    wait;  -- Simulation stops stop after clock stops
-  end process clk_gen;
+    while true loop
+      wait until clk_en;
+      while clk_en loop
+        clk <= not clk;
+        wait for CLK_HALF_PERIOD;
+      end loop;
+    end loop;
+    wait;
+  end process clkgen;
+
+
 
   main_test: process
   begin
 
     report("reset dut");
 
-    clr(i_clr);
-    clr(i_enable);
+    i_clr <= '0';
+    i_enable <= '0';
     pulse(rst, clk, 10);
 
     report("Disable counter");
 
-    wait_re(clk,10);
+    for i in 1 to 10 loop wait until rising_edge(clk); end loop;
 
     report("Increment Counter");
-    set(i_enable);
-    wait_re(clk, 1000);
-    
+    i_enable <= '1';
+
+
+    for i in 1 to 1000 loop wait until rising_edge(clk); end loop;
+
     report("Clear Counter");
-    pulse(i_clr,clk,100);
-
-
+    i_clr   <= '1';
+    for i in 1 to 100 loop wait until rising_edge(clk); end loop;
+    i_clr <= '0';
+    
     report("Increment Counter Again");
-    set(i_enable);
-    wait_re(clk, 1000);
+    i_enable <= '1';
+
+    for i in 1 to 1000 loop wait until rising_edge(clk); end loop; 
     
     report("Disable Counter");
-    clr(i_enable);
-    wait_re(clk, 1000);
+    i_enable <= '0';
+
+    for i in 1 to 1000 loop wait until rising_edge(clk); end loop;
 
     report("test done"); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
-
-    set(test_done);
+    test_done <= '1';
     wait;
   end process main_test;
 
