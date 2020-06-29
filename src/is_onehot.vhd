@@ -23,28 +23,38 @@ end is_onehot;
 
 architecture rtl of is_onehot is
 
-  function func_or(in_vec : std_logic_vector) return std_logic is
+  function is_allzeroes(in_vec : std_logic_vector) return std_logic is
     variable o_or : std_logic;
     variable all_zeroes :std_logic_vector(in_vec'range) := (others => '0');
   begin
-    o_or := '0' when in_vec = all_zeroes else '1';
-    return o_or; 
-  end function func_or;
+    o_or := '1' when in_vec = all_zeroes else '0';
+    return o_or;
+  end function is_allzeroes;
+  
+  
+  function one_or_more(in_vec :std_logic_vector) return std_logic is
+  begin
+    return not is_allzeroes(in_vec);
+  end function one_or_more;
 
 
-  function func_and(in_vec : std_logic_vector) return std_logic is
+  function is_allones(in_vec : std_logic_vector) return std_logic is
     variable o_and : std_logic;
     variable all_ones : std_logic_vector(in_vec'range) := (others => '0');
   begin
     o_and := '1' when in_vec = all_ones else '0';
     return o_and;
-  end function func_and;
+  end function is_allones;
+  
+  function not_allones(in_vec : std_logic_vector) return std_logic is
+  begin
+    return not is_allones(in_vec);
+  end function not_allones;
 
 
-  function func_is_onehot(in_vec :std_logic_vector) return std_logic is
+  function one_and_only_one(in_vec :std_logic_vector) return std_logic is
     variable mask_vec   : std_logic_vector(in_vec'range);
     variable hot_vec    : std_logic_vector(in_vec'range);
-    variable is_hot     : std_logic;
     variable all_zeroes : std_logic_vector(in_vec'range) := (others => '0'); 
   begin
     for ii in in_vec'range loop
@@ -52,12 +62,11 @@ architecture rtl of is_onehot is
       mask_vec(ii) := '1';
       hot_vec(ii) := '1' when (in_vec = mask_vec) else '0';
     end loop;
-    is_hot := '0' when hot_vec = all_zeroes else '1';
-    return is_hot;
-  end function func_is_onehot;
+    return one_or_more(hot_vec);
+  end function one_and_only_one;
 
 begin
-  o_hot <= func_is_onehot(i_data);
+  o_hot <= one_and_only_one(i_data);
 end rtl;
 
 
