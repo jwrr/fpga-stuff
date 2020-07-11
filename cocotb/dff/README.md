@@ -35,9 +35,9 @@ Install Icarus Verilog
 sudo apt install iverilog
 ```
 
-Run Icarus Verilog Simulation
+Run Cocotb + Icarus Simulation
 -----------------------------
-
+make SIM=icarus
 
 [osvvm]: https://github.com/OSVVM/OSVVM
 [uvvm]: https://github.com/UVVM/UVVM
