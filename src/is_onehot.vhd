@@ -40,7 +40,7 @@ architecture rtl of is_onehot is
 
   function is_allones(in_vec : std_logic_vector) return std_logic is
     variable o_and : std_logic;
-    variable all_ones : std_logic_vector(in_vec'range) := (others => '0');
+    variable all_ones : std_logic_vector(in_vec'range) := (others => '1');
   begin
     o_and := '1' when in_vec = all_ones else '0';
     return o_and;
