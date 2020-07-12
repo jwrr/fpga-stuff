@@ -35,9 +35,19 @@ Install Icarus Verilog
 sudo apt install iverilog
 ```
 
-Run Cocotb + Icarus Simulation
------------------------------
+Run Cocotb + Icarus
+-------------------
+
+```
 make SIM=icarus
+```
+
+Run Cocotb + GHDL Sim with Waves
+--------------------------------
+
+```
+make SIM=ghdl SIM_ARGS=--vcd=ghdl_dff.vc
+```
 
 [osvvm]: https://github.com/OSVVM/OSVVM
 [uvvm]: https://github.com/UVVM/UVVM
