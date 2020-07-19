@@ -1,7 +1,21 @@
 # Single Port RAM in Verilog.
 
-* Simulated with [Icarus Verilg](http://iverilog.icarus.com/)
-* Tests were implemented in Python using [cocotb](https://docs.cocotb.org/en/stable/).
+* Simulate with [Icarus Verilog](http://iverilog.icarus.com/)
+* Test with Python / [cocotb](https://docs.cocotb.org/en/stable/).
+
+## Details
+
+* Create a simple Verilog memory model.  It's a single port RAM loosely based on the
+[Latice ICE40 Embedded Block RAM(EBR)](file:///C:/Users/Robin/AppData/Local/Temp/MemoryUsageGuideforiCE40Devices-2.pdf) 
+Hopely it should be inferred by [Yosys Open Source Synthesis tools](http://www.clifford.at/yosys/links.html).
+* Make an old school verilog testbench to make sure it's alive. It just writes and then reads all locations.
+* Make a randomized cocotb testbench. It writes/reads to random locations.  It then reads all locations.
+
+## Summary
+
+* The RAM is simple to verify in with pure Verilog test.
+* With cocotb is was easy to create a much more complex test.  I can see this approach will scale to more complex designs.
+
 
 ## Links I went to while creating this test
 
