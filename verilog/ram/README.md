@@ -19,7 +19,7 @@ Hopely it should be inferred by [Yosys Open Source Synthesis tools](http://www.c
 
 ## Links I went to while creating this test
 
-* [Does Icarus Verilog support SystemVerilog?](https://iverilog.fandom.com/wiki/Iverilog_Flags?action=edit&section=4). Verilog 2005 is default. SystemVerilog 2012 developmengt is ongoing. cocotb uses the -g2012 switch.
+* [Does Icarus Verilog support SystemVerilog?](https://iverilog.fandom.com/wiki/Iverilog_Flags). Verilog 2005 is default. SystemVerilog 2012 developmengt is ongoing. cocotb uses the -g2012 switch.
 * [cocotb quickstart](https://docs.cocotb.org/en/stable/quickstart.html)
 * [Python Dictionary](https://www.tutorialspoint.com/python/python_dictionary.htm) - dict{}, dict.update({newkey : newval}), val = expect_ram[key], 
 * [Python Key in Dictionary](https://www.geeksforgeeks.org/python-check-whether-given-key-already-exists-in-a-dictionary/) - if key in dict.keys(): 
