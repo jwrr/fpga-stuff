@@ -8,6 +8,9 @@ from cocotb.triggers import FallingEdge
 
 
 def dv(dut, act, exp, description):
+    if exp == None:
+        return
+
 #     parent = act.parent
     val = act.value.integer
     if exp != val:
@@ -26,7 +29,7 @@ async def test_ram_random(dut):
 
     expect_ram = {}
     await FallingEdge(dut.clk)  # Synchronize with the clock
-    for i in range(10000):
+    for i in range(500):
         i_we = random.randint(0, 1)
         dut.i_we = i_we
 
@@ -35,13 +38,18 @@ async def test_ram_random(dut):
         i_addr = random.randint(0,2**8-1)
         dut.i_addr = i_addr;
 
+        rdata_exp = expect_ram.get(i_addr)
+
         if i_we == 1:
             expect_ram.update( {i_addr : i_dat})
-            
-        await FallingEdge(dut.clk)  
-        
-        
-    
+
+        await FallingEdge(dut.clk)
+
+        if i_we == 0:
+            dv(dut, dut.o_dat, rdata_exp , "ram[" + str(i_addr) + "]")
+
+
+
     for i in range(256):
         dut.i_we = 0
         dut.i_addr = i
@@ -49,7 +57,7 @@ async def test_ram_random(dut):
         await FallingEdge(dut.clk)
         if i == 10:
             expect_ram[i] = 0
-        dv(dut, dut.o_dat, expect_ram[i], "ram[" + str(i) + "]")
+        dv(dut, dut.o_dat, expect_ram.get(i), "ram[" + str(i) + "]")
 #         exp = expect_ram[i]
 #         act = dut.o_dat.value.integer
 #         if exp != act:
