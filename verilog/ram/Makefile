@@ -1,10 +1,9 @@
 # This file is public domain, it can be freely copied without restrictions.
 # SPDX-License-Identifier: CC0-1.0
 
-TESTNAME ?= ram_random
+#MODULE = test_ram_directed
+MODULE ?= test_ram_random
 VERILOG_SOURCES = rtl/ram.v
-
-MODULE = test_ram_random
 TOPLEVEL = ram
 
 # Shorten log line
