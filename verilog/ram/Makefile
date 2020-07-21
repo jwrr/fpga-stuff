@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: CC0-1.0
 
 TESTNAME ?= ram_random
-VERILOG_SOURCES = ram.v
+VERILOG_SOURCES = rtl/ram.v
 
-MODULE = test_$(TESTNAME)
+MODULE = test_ram_random
 TOPLEVEL = ram
 
 # Shorten log line
