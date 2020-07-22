@@ -33,7 +33,6 @@ module ram #(
     $dumpvars(0,ram);
   end
 
-
 endmodule
 
 

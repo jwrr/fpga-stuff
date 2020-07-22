@@ -9,15 +9,17 @@ class dv_test:
 
     err_cnt = 0
     tot_cnt = 0
-    err_max = 10
-    msg_lvl = 2 # 3 = all, 2 = fail, 1 = result, 0 = none
+    err_max = 5 # stop test after this many errorors
+    msg_lvl = 2 # 0 = none, 1 = result, 2 = fail, 3 = all
     dut = None
 
-    def __init__(self, dut, msg_lvl="Fail", err_max=10 ):
+
+    def __init__(self, dut, msg_lvl="Fail", err_max=10):
         self.dut = dut
         msg_lvls = {"None" : 0, "Summary" : 1, "Fail" : 2, "All" : 3}
         self.msg_lvl = msg_lvls[msg_lvl] 
         self.err_max = err_max
+
 
     def eq(self, act, exp, description=""):
         if exp == None:
@@ -41,6 +43,7 @@ class dv_test:
             if self.msg_lvl >= 3:
                 self.dut._log.info("PASS: act = " + hex(val) + " " + description)
 
+
     def done(self):
         test_pass = (self.err_cnt == 0)
         if self.msg_lvl >= 1:
@@ -51,8 +54,5 @@ class dv_test:
                 msg = "TEST FAILED: " + str(self.err_cnt) + " of " + str(self.tot_cnt) + " checks failed"
                 self.dut._log.error(msg)
         assert test_pass, msg
-
-
-# -----------------------------------------------------------------------------
 
 
