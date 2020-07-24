@@ -5,7 +5,7 @@ import random
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import FallingEdge
-from imports.dv_test import dv_test
+from dv_test import dv_test
 
 
 # -----------------------------------------------------------------------------

@@ -7,18 +7,13 @@ import cocotb
 
 class dv_test:
 
-    err_cnt = 0
-    tot_cnt = 0
-    err_max = 5 # stop test after this many errorors
-    msg_lvl = 2 # 0 = none, 1 = result, 2 = fail, 3 = all
-    dut = None
-
-
     def __init__(self, dut, msg_lvl="Fail", err_max=10):
         self.dut = dut
         msg_lvls = {"None" : 0, "Summary" : 1, "Fail" : 2, "All" : 3}
-        self.msg_lvl = msg_lvls[msg_lvl] 
+        self.msg_lvl = msg_lvls[msg_lvl]
         self.err_max = err_max
+        self.err_cnt = 0
+        self.tot_cnt = 0
 
 
     def eq(self, act, exp, description=""):
