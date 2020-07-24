@@ -22,6 +22,12 @@ git push
 cd iceZ0mb1e/
 ```
 
+## Create CTAGS file of all Verilog and Python files
+
+```
+ctags `find . -type f -name \*.v -o -name \*.py`
+```
+
 ## Run Existing Testbench
 
 

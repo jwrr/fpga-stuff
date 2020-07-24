@@ -51,3 +51,6 @@ class dv_test:
         assert test_pass, msg
 
 
+    def info(self, msg):
+        self.dut._log.info(msg)
+
