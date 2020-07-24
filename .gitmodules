@@ -1,3 +1,33 @@
 [submodule "examples/z80/iceZ0mb1e"]
 	path = examples/z80/iceZ0mb1e
 	url = https://github.com/abnoname/iceZ0mb1e
+[submodule "examples/z80/cocotbext-uart"]
+	path = examples/z80/cocotbext-uart
+	url = https://github.com/wallento/cocotbext-uart
+[submodule "examples/z80/cocotbext-spi"]
+	path = examples/z80/cocotbext-spi
+	url = https://github.com/Martoni/cocotbext-spi
+[submodule "examples/z80/cocomod-fifointerface"]
+	path = examples/z80/cocomod-fifointerface
+	url = https://github.com/wallento/cocomod-fifointerface
+[submodule "examples/z80/cocotb-test"]
+	path = examples/z80/cocotb-test
+	url = https://github.com/themperek/cocotb-test
+[submodule "examples/z80/uvm-python"]
+	path = examples/z80/uvm-python
+	url = https://github.com/tpoikela/uvm-python
+[submodule "examples/z80/cocotb-coverage"]
+	path = examples/z80/cocotb-coverage
+	url = https://github.com/mciepluc/cocotb-coverage
+[submodule "examples/z80/oc_jpegencode"]
+	path = examples/z80/oc_jpegencode
+	url = https://github.com/chiggs/oc_jpegencode
+[submodule "examples/z80/apbi2c_cocotb_example"]
+	path = examples/z80/apbi2c_cocotb_example
+	url = https://github.com/mciepluc/apbi2c_cocotb_example
+[submodule "examples/z80/usb-test-suite-cocotb-usb"]
+	path = examples/z80/usb-test-suite-cocotb-usb
+	url = https://github.com/antmicro/usb-test-suite-cocotb-usb
+[submodule "examples/z80/tinyfpga_bx_usbserial"]
+	path = examples/z80/tinyfpga_bx_usbserial
+	url = https://github.com/davidthings/tinyfpga_bx_usbserial
