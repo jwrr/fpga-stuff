@@ -1,29 +1,29 @@
 [submodule "examples/z80/cocotbext-uart"]
-	path = projects/z80/cocotbext-uart
+	path = projects/z80/cocotb-stuff/cocotbext-uart
 	url = https://github.com/wallento/cocotbext-uart
 [submodule "examples/z80/cocotbext-spi"]
-	path = projects/z80/cocotbext-spi
+	path = projects/z80/cocotb-stuff/cocotbext-spi
 	url = https://github.com/Martoni/cocotbext-spi
 [submodule "examples/z80/cocomod-fifointerface"]
-	path = projects/z80/cocomod-fifointerface
+	path = projects/z80/cocotb-stuff/cocomod-fifointerface
 	url = https://github.com/wallento/cocomod-fifointerface
 [submodule "examples/z80/cocotb-test"]
-	path = projects/z80/cocotb-test
+	path = projects/z80/cocotb-stuff/cocotb-test
 	url = https://github.com/themperek/cocotb-test
 [submodule "examples/z80/uvm-python"]
-	path = projects/z80/uvm-python
+	path = projects/z80/cocotb-stuff/uvm-python
 	url = https://github.com/tpoikela/uvm-python
 [submodule "examples/z80/cocotb-coverage"]
-	path = projects/z80/cocotb-coverage
+	path = projects/z80/cocotb-stuff/cocotb-coverage
 	url = https://github.com/mciepluc/cocotb-coverage
 [submodule "examples/z80/oc_jpegencode"]
-	path = projects/z80/oc_jpegencode
+	path = projects/z80/cocotb-stuff/oc_jpegencode
 	url = https://github.com/chiggs/oc_jpegencode
 [submodule "examples/z80/apbi2c_cocotb_example"]
-	path = projects/z80/apbi2c_cocotb_example
+	path = projects/z80/cocotb-stuff/apbi2c_cocotb_example
 	url = https://github.com/mciepluc/apbi2c_cocotb_example
 [submodule "examples/z80/usb-test-suite-cocotb-usb"]
-	path = projects/z80/usb-test-suite-cocotb-usb
+	path = projects/z80/cocotb-stuff/usb-test-suite-cocotb-usb
 	url = https://github.com/antmicro/usb-test-suite-cocotb-usb
 [submodule "examples/z80/tinyfpga_bx_usbserial"]
 	path = projects/z80/tinyfpga_bx_usbserial
