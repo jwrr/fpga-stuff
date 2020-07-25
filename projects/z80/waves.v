@@ -1,7 +1,9 @@
 module waves();
-  initial begin
-    $dumpfile(`VCD_OUT);
-    $dumpvars(0, iceZ0mb1e);
-  end
+    initial begin
+        if ($test$plusargs ("WAVES_ON")) begin
+            $dumpfile(`VCD_OUT);
+            $dumpvars();
+        end
+    end
 endmodule
 

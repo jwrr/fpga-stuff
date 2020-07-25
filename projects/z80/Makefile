@@ -13,11 +13,12 @@ COMPILE_ARGS += -D__def_fw_img=\"$(FIRMWARE_FILE)\"
 
 # If WAVES is define then add waves.v to the compile list to set $dumpvars and
 # $dumpfile. Also define the vcd filename if it has not been set yet.
-#ifdef $(WAVES)
+ifdef WAVES
   SRC += waves.v
   VCD_OUT ?= $(TOPLEVEL).vcd
   COMPILE_ARGS += -DVCD_OUT=\"$(VCD_OUT)\" -s waves
-#endif
+  PLUSARGS += +WAVES_ON
+endif
 
 # DEBUG, INFO, WARNING, ERROR, CRITICAL
 export COCOTB_LOG_LEVEL ?= INFO

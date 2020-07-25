@@ -1,7 +1,13 @@
 # Z80 + COCOTB TESTBENCH
 
-This example attempts to add a cocotb testbench to a working Z80 porcessor
+This example adds a cocotb testbench to a working Z80 processor
 design.
+
+## Run Simulation
+
+```
+make
+```
 
 ## Create submodules
 

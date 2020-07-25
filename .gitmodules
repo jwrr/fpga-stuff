@@ -29,3 +29,7 @@
 	path = projects/z80/tinyfpga_bx_usbserial
 	url = https://github.com/davidthings/tinyfpga_bx_usbserial
 
+[submodule "projects/z80/iceZ0mb1e"]
+	path = projects/z80/iceZ0mb1e
+	url = https://github.com/jwrr/iceZ0mb1e
+	branch = jwrr/systemverilog
