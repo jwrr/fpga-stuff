@@ -1,0 +1,3 @@
+firmware:
+	cd iceZ0mb1e; make firmware TARGET=8k; cd ..
+
