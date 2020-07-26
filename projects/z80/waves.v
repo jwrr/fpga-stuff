@@ -1,7 +1,7 @@
 module waves();
     initial begin
         if ($test$plusargs ("WAVES_ON")) begin
-            $dumpfile(`VCD_OUT);
+            $dumpfile(`WAVES_OUT);
             $dumpvars();
         end
     end
