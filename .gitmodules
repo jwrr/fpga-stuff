@@ -33,3 +33,6 @@
 	path = projects/z80/iceZ0mb1e
 	url = https://github.com/jwrr/iceZ0mb1e
 	branch = jwrr/systemverilog
+[submodule "e-uvm/axi4lite_sha3"]
+	path = euvm/axi4lite_sha3
+	url = https://github.com/jwrr/axi4lite_sha3.git
