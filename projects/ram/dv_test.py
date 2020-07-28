@@ -64,6 +64,19 @@ class dv_test:
             return xval
 
 
+    def bin2int(self, binstr, xval = -1):
+        binstr = binstr
+        try:
+            val = int(binstr,2)
+            return val
+        except ValueError:
+            return xval
+
+
+    def val(self, sig, xval = -1):
+        return bin2int(sig.value.binstr)
+
+
     def hi(self, sig, xval = False):
         binstr = sig.value.binstr
         try:
