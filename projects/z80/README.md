@@ -37,3 +37,9 @@ ctags `find . -type f -name \*.v -o -name \*.py`
 ## Run Existing Testbench
 
 
+## Qustions
+
+* How do you loop back signal? dut.a <= dut.b.value  I test that this works even why b contains non-numerics (Xs)
+  * why not dut.a <= dut.b
+* Can cocotb await multipe signals? Can cocotb create a virtual signal?  If any bit changes then fire await event
+* _log.info should take mulltile input like print

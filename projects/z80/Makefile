@@ -13,7 +13,8 @@ COMPILE_ARGS += -D__def_fw_img=\"$(FIRMWARE_FILE)\"
 
 # If WAVES is define then add waves.v to the compile list to set $dumpvars and
 # $dumpfile. Also define the vcd filename if it has not been set yet.
-ifdef WAVES
+WAVES ?= fst
+ifneq ( $(WAVES),)
   SRC += waves.v
   ifeq ($(WAVES),fst)
     EXTENDED_ARGS += -fst
