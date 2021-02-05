@@ -7,8 +7,8 @@
 ### ICARUS MODULE = test_dff
 ### ICARUS include $(shell cocotb-config --makefiles)/Makefile.sim
 
-# SIM = ghdl
-# SIM_ARGS=--vcd=waves.vcd
+SIM = ghdl
+SIM_ARGS=--vcd=waves.vcd
 TOPLEVEL_LANG = vhdl
 # export PYTHONPATH := $(PWD)/../model:$(PYTHONPATH)
 VHDL_SOURCES = $(PWD)/dff.vhd

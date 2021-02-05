@@ -1,0 +1,4 @@
+ls *vhd | sed 's#^#make BLOCK=#;s#.vhd$##' > regress.list
+source regress.list > regress.log
+grep 'PASS ' regress.log
+grep ' FAIL' regress.log
