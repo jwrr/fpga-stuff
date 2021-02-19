@@ -34,7 +34,7 @@
 	url = https://github.com/jwrr/iceZ0mb1e
 	branch = jwrr/systemverilog
 [submodule "e-uvm/axi4lite_sha3"]
-	path = euvm/axi4lite_sha3
+	path = verilog-stuff/euvm/axi4lite_sha3
 	url = https://github.com/jwrr/axi4lite_sha3.git
 [submodule "projects/usb/tinyfpga_bx_usbserial"]
 	path = projects/usb/tinyfpga_bx_usbserial

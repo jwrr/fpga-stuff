@@ -8,15 +8,33 @@
 * Create a simple Verilog memory model.  It's a single port RAM loosely based on the
 [Lattice ICE40 Embedded Block RAM(EBR)]
 (file:///C:/Users/Robin/AppData/Local/Temp/MemoryUsageGuideforiCE40Devices-2.pdf) 
-Hopely it should be inferred by [Yosys Open Source Synthesis tools]
+Hopefully it should be inferred by [Yosys Open Source Synthesis tools]
 (http://www.clifford.at/yosys/links.html).
 * Make an old school verilog testbench to make sure it's alive. It just writes and then reads all locations.
 * Make a randomized cocotb testbench. It writes/reads to random locations.  It then reads all locations.
 
+## Simulated Verilog-only using Icarus
+
+```
+sudo apt update
+sudo apt install iverilog
+iverilog -o tb_ram.vvp ram.v tb_ram.v
+vvp tb_ram.vvp
+gtkwave test.vcd
+```
+
+## Simulate using cocotb+iverilog
+
+```
+make
+gtkwave test.vcd
+```
+
+
 ## Summary
 
 * The RAM is simple to verify in with pure Verilog test.
-* With cocotb is was easy to create a much more complex test.  I can see this 
+* The cocotb testbench was easy to create and was much more thorough.  The cocotb
   approach will scale to more complex designs.
 
 
@@ -72,7 +90,5 @@ https://www.youtube.com/watch?v=9kZrlsv0fF4)
   * [USB 1.1 Test](https://antmicro.com/blog/2019/12/testing-usb-cores-with-python-and-cocotb/)
 * [OSHUG 36 — Cocotb, Chris Higgs.](
 https://www.youtube.com/watch?v=M2rAOF4EvVI)
-
-
 
 
