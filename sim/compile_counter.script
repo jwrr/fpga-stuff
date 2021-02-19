@@ -1,0 +1,6 @@
+ghdl -a --std=08 \
+../src/counter.vhd \
+../tb/tb_pkg.vhd \
+../tb/tb_counter.vhd
+
+ghdl -e --std=08 tb
