@@ -1,0 +1,2 @@
+clear && iverilog -o ram2p.vvp ram2p.v tb_ram2p.v  && vvp ram2p.vvp
+
