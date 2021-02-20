@@ -1,0 +1,2 @@
+clear && iverilog -o divide_by_n.vvp divide_by_n.v tb_divide_by_n.v  && vvp divide_by_n.vvp
+
