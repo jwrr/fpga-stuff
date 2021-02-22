@@ -1,0 +1,2 @@
+clear && iverilog -o gray.vvp  bin2gray.v gray2bin.v tb_gray.v  && vvp gray.vvp
+
