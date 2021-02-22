@@ -1,9 +1,8 @@
 `timescale 1 ns /  100 ps
 module tb;
-  parameter NUM_BITS  = 4096;
-  parameter DWID      = 16; // 16, 8, 4, 2
-  parameter DEPTH     = NUM_BITS / DWID;
+  parameter DWID      = 16;
   parameter AWID      = 8; // $clog2(DEPTH);
+  parameter DEPTH     = 2**AWID;
 
   reg              clk = 0;
   reg              i_we = 0;
@@ -13,7 +12,7 @@ module tb;
   wire [DWID-1:0]  o_dat;
   integer ii;
   
-  ram2p #(AWID,DWID) u_dut (
+  ram2p #(AWID,DEPTH,DWID) u_dut (
     .clka(clk),
     .i_wea(i_we),
     .i_addra(i_waddr),

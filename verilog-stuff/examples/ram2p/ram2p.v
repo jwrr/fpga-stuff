@@ -8,6 +8,7 @@
 
 module ram2p #(
   parameter AWID  = 8,
+  parameter DEPTH = 256,
   parameter DWID  = 16
 ) (
   input                 clka,
@@ -22,8 +23,6 @@ module ram2p #(
   input      [DWID-1:0] i_datb,
   output reg [DWID-1:0] o_datb
 );
-
-  localparam DEPTH = 2**AWID;
 
   reg [DWID-1:0] mem_array[0:DEPTH-1];
 
