@@ -1,8 +1,0 @@
-clear && \
-iverilog -o avg_n_at_a_time.vvp \
-../sum_n_at_a_time/sum_n_at_a_time.v \
-../divide_by_n/divide_by_n.v \
-avg_n_at_a_time.v \
-tb_avg_n_at_a_time.v && \
-vvp avg_n_at_a_time.vvp
-
