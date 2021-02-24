@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Block: adder_tree
+// Block: sum_n_per_clk
 // Description:
 // This block adds multiple inputs together and returns a sum.
 // NUM_INPUTS defines the number of input values. It must be a power of 2.
@@ -7,13 +7,13 @@
 //
 //------------------------------------------------------------------------------
 
-module adder_tree #(
+module sum_n_per_clk #(
   parameter NUM_INPUTS  = 16,
   parameter DWIDTH      = 8
 ) (
   input                          clk,
   input                          rst,
-  input  [NUM_INPUTS*DWIDTH-1:0] i_dat_vector,  // see tb_adder_tree on bit packing
+  input  [NUM_INPUTS*DWIDTH-1:0] i_dat_vector,  // see tb_sum_n_per_clk on bit packing
   input                          i_dat_valid,
   output [DWIDTH-1:0]            o_sum,
   output                         o_sum_valid

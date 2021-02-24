@@ -1,2 +1,0 @@
-clear && iverilog -o adder_tree.vvp adder_tree.v tb_adder_tree.v  && vvp adder_tree.vvp
-

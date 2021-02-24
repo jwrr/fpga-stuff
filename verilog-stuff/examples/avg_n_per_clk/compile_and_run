@@ -1,0 +1,8 @@
+clear && \
+iverilog -o avg_n_per_clk.vvp \
+../sum_n_per_clk/sum_n_per_clk.v \
+../divide_by_n/divide_by_n.v \
+avg_n_per_clk.v \
+tb_avg_n_per_clk.v && \
+vvp avg_n_per_clk.vvp
+

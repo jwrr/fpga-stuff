@@ -1,0 +1,2 @@
+clear && iverilog -o sum_n_per_clk.vvp sum_n_per_clk.v tb_sum_n_per_clk.v  && vvp sum_n_per_clk.vvp
+
