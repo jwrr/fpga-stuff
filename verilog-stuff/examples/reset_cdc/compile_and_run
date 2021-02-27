@@ -1,0 +1,2 @@
+clear && iverilog -o reset_cdc.vvp reset_cdc.v tb_reset_cdc.v  && vvp reset_cdc.vvp
+
