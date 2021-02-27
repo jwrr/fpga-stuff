@@ -1,0 +1,2 @@
+clear && iverilog -o decoder.vvp decoder.v tb_decoder.v  && vvp decoder.vvp
+

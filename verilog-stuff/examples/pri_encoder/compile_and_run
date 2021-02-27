@@ -1,0 +1,2 @@
+clear && iverilog -o pri_encoder.vvp pri_encoder.v tb_pri_encoder.v  && vvp pri_encoder.vvp
+
