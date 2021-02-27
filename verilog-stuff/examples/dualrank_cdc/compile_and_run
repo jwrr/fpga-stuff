@@ -1,0 +1,2 @@
+clear && iverilog -o dualrank_cdc.vvp dualrank_cdc.v tb_dualrank_cdc.v  && vvp dualrank_cdc.vvp
+
