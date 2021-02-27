@@ -1,0 +1,2 @@
+clear && iverilog -o demux.vvp demux.v tb_demux.v  && vvp demux.vvp
+

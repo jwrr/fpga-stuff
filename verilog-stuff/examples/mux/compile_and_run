@@ -1,0 +1,2 @@
+clear && iverilog -o mux.vvp mux.v tb_mux.v  && vvp mux.vvp
+
