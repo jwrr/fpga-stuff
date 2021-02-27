@@ -1,0 +1,2 @@
+clear && iverilog -o gain_stage.vvp gain_stage.v tb_gain_stage.v  && vvp gain_stage.vvp
+
