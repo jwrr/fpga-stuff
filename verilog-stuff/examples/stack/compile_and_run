@@ -1,0 +1,2 @@
+clear && iverilog -o stack.vvp ../ram2p/ram2p.v stack.v tb_stack.v  && vvp stack.vvp
+
