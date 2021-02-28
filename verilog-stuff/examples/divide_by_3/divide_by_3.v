@@ -47,7 +47,7 @@ module divide_by_3 #(
   
   wire [DWIDTH_PADDED-1:0] div3_padded;
   wire                     div3_padded_valid;
-  adder_tree #(NUM_TERMS, DWIDTH_PADDED) u_adder_tree (
+  sum_n_per_clk #(NUM_TERMS, DWIDTH_PADDED) u_sum_n_per_clk (
     .clk(clk),
     .rst(rst),
     .i_dat_vector(term_vector),

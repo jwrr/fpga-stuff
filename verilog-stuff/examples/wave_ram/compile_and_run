@@ -1,0 +1,12 @@
+clear && \
+iverilog -o wave_ram.vvp \
+../reset_cdc/reset_cdc.v \
+../dualrank_cdc/dualrank_cdc.v \
+../ram2p/ram2p.v \
+../graycode/bin2gray.v \
+../graycode/gray2bin.v \
+../fifo/fifo.v \
+wave_ram.v \
+tb_wave_ram.v && \
+vvp wave_ram.vvp
+

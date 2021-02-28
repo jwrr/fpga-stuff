@@ -12,7 +12,7 @@ module tb;
   wire [DWID-1:0]  o_dat;
   integer ii;
   
-  ram2p #(AWID,DEPTH,DWID) u_dut (
+  ram2p #(DEPTH,AWID,DWID) u_dut (
     .clka(clk),
     .i_wea(i_we),
     .i_addra(i_waddr),

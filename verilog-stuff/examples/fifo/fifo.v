@@ -133,7 +133,7 @@ module fifo #(
 
   wire [DWID-1:0] dout_rclk;
 
-  ram2p #(AWID,DWID) u_ram2p (
+  ram2p #(DEPTH,AWID,DWID) u_ram2p (
     .clka(wclk),
     .i_wea(write_wclk),
     .i_addra(waddr_wclk),

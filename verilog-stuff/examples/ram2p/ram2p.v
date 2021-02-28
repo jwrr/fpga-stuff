@@ -7,8 +7,8 @@
 
 
 module ram2p #(
-  parameter AWID  = 8,
   parameter DEPTH = 256,
+  parameter AWID  = 8,
   parameter DWID  = 16
 ) (
   input                 clka,

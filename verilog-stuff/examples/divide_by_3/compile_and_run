@@ -1,2 +1,2 @@
-clear && iverilog -o divide_by_3.vvp ../adder_tree/adder_tree.v divide_by_3.v tb_divide_by_3.v  && vvp divide_by_3.vvp
+clear && iverilog -o divide_by_3.vvp ../sum_n_per_clk/sum_n_per_clk.v divide_by_3.v tb_divide_by_3.v  && vvp divide_by_3.vvp
 
