@@ -28,38 +28,41 @@ import mylittleparser as mlp
 
 class SVParser(mlp.MyLittleParser):
 
-    def parse_parameters(self, parm_list):
-        token = self.peek_next_token()
-        if token != "#":
-            return False
+    # parameter_port_list ::=
+    #   '#' '(' {parameter_keyword? parameter_identifier '=' constant}* ')' 
+    def parse_parameter_port_list(self):
+        parms = {} 
+        if self.peek_token() != "#":
+            return parms
         self.get_keyword("#")
         self.get_keyword("(")
         while True:
-            self.get_keyword("parameter")
+            self.get_optional_keyword("parameter")
             parm_name = self.get_name()
             self.get_keyword("=")
             parm_value = self.get_value()
-            parm_list[parm_name] = parm_value
+            parms[parm_name] = parm_value
             token = self.get_choice(", )")
             if token == ")":
                 break
+        return parms
 
 
     def parse_signals(self, sig_list):
-        token = self.peek_next_token()
+        token = self.peek_token()
         while token in "logic bit".split():
             sig_type = self.get_choice("logic bit")
             sig_size = self.get_from_to("[", "]", sep="")
             sig_name = self.get_name()
             self.add_sig(sig_list, sig_name, sig_type, sig_size)
-            token = self.peek_next_token()
+            token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
                 sig_name = self.get_name()
                 self.add_sig(sig_list, sig_name, sig_type, sig_size)
-                token = self.peek_next_token()
+                token = self.peek_token()
             self.get_keyword(";")
-            token = self.peek_next_token()
+            token = self.peek_token()
 
 
     def get_init_value(self):
@@ -94,28 +97,20 @@ class ModuleParser(SVParser):
         self.module_dict = sv_dict["module"] = {}
         self.lines = []
 
-
-    def parse_module(self, filename):
+    # module_declaration ::=
+    # module_ansi_header { non_port_module_item } endmodule
+    def parse_module_declaration(self, filename):
         self.slurp_tokens(filename)
         if not self.find_token("module"):
             return
         lnum1 = self.g_line_i
-        module_name = self.get_name()
-        module_dict = self.module_dict[module_name] = {}
-        sig_list  = module_dict["sig"] = {}
-        port_list = module_dict["port"] = {}
-        parm_list = module_dict["parm"] = {}
+        self.get_prev_token()
+        all_modules = self.module_dict
+        all_ifaces = self.sv_dict["iface"] if "iface" in self.sv_dict else {}
+        this_module_dict = self.parse_module_header(all_modules, all_ifaces)
+        sig_list = this_module_dict["sig"] = {}
 
-        if "iface" in self.sv_dict:
-            iface_list = self.sv_dict["iface"]
-        else:
-            iface_list = self.sv_dict["iface"] = {}
-
-        self.parse_parameters(parm_list)
-        self.parse_ports(port_list, iface_list)
-        self.get_keyword(";")
-
-        token = self.peek_next_token()
+        token = self.peek_token()
         while token != "endmodule" and token != "":
             if token in "reg wire logic".split():
                 self.parse_signal_declaration(sig_list)
@@ -127,7 +122,7 @@ class ModuleParser(SVParser):
 #                 self.parse_localparam()
             else:
                 token = self.get_unknown()
-            token = self.peek_next_token()
+            token = self.peek_token()
         self.get_keyword("endmodule")
         lnum2 = self.g_line_i+1
 
@@ -135,61 +130,71 @@ class ModuleParser(SVParser):
             print(l)
 
 
-    def is_valid_port_type(self, token, iface_list):
-        is_port_type = token in "input output inout".split()
-        is_iface_name = token in iface_list
-        is_valid = is_port_type or is_iface_name
-        return is_valid
+    def parse_module_header(self, all_modules, all_ifaces):
+        return self.parse_module_ansi_header(all_modules, all_ifaces)
 
 
-    def parse_ports(self, port_list, iface_list):
-        token = self.peek_next_token()
-        if token != "(":
-            return False
+    # module_ansi_header ::= 
+    # module_keyword module_identifier [ parameter_port_list ] [ list_of_port_declarations ] ;
+    def parse_module_ansi_header(self, all_modules_dict, all_ifaces):
+        self.get_keyword("module")
+        module_name = self.get_name()
+        all_modules_dict[module_name] = {}
+        module_dict = all_modules_dict[module_name]
+        port_list = module_dict["port"] = {}
+        module_dict["parm"] = self.parse_parameter_port_list()
+        module_dict["port"] = self.parse_list_of_port_declarations(all_ifaces)
+        self.get_keyword(";")
+        return module_dict
+
+
+    # list_of_port_declarations
+    # '(' port_type port_name { ',' port_type? portname}*  ')'
+    # port_type ::= port_direction | interface_name
+    def parse_list_of_port_declarations(self, if_list):
+        if self.peek_token() != "(":
+            return {}
+        port_list = {}
         self.get_keyword("(");
-        token = self.peek_next_token()
-        while self.is_valid_port_type(token, iface_list):
-            port_type = self.peek_and_get("input output inout")
-            is_iface = port_type == ""
-            if is_iface:
-                iface_name = self.get_name()
-                port_type = iface_name;
-                port_size = ""
-            else:
-                port_type += " " + self.peek_and_get("reg wire logic", "wire")
-                port_size = self.get_array_size()
-            siglist_done = False
-            while not siglist_done:
-                port_name = self.get_name()
-                self.add_sig(port_list, port_name, port_type, port_size)
-                token = self.peek_next_token()
-                sep = ""
-                if token == ",":
-                    sep = ","
-                if is_iface:
-                    iface_sigs = []
-                    if "clk_name" in iface_list[iface_name]:
-                        iface_clk = iface_list[iface_name]["clk_name"]
-                        iface_sigs.append(f"input {port_name}__{iface_clk}")
-                    for s in iface_list[iface_name]["sig"]:
-                        io = iface_list[iface_name]["sig"][s]["modport"]["mem"]
-                        size = iface_list[iface_name]["sig"][s]["size"]
-                        iface_sigs.append(f"{io} {size} {port_name}__{s}")
-                    iface_sig_str = ", ".join(iface_sigs)
-                    self.lines[self.g_line_i] = f"  {iface_sig_str}{sep} // {self.lines[self.g_line_i]}"
-                    self.lines[self.g_line_i] = "  " + self.lines[self.g_line_i]
-                    from_str = f"{port_name}."
-                    to_str = f"{port_name}__"
-                    self.lines = [l.replace(from_str, to_str) for l in self.lines]
+        ptype = self.parse_port_type_and_name(port_list, if_list, "")
+        while self.get_choice(", )") == ",":
+            ptype = self.parse_port_type_and_name(port_list, if_list, ptype)
 
-                if token == ",":
-                    self.get_keyword(",")
-                    token = self.peek_next_token()
-                    if self.is_valid_port_type(token, iface_list):
-                        siglist_done = True
-                else:
-                    siglist_done = True
-        self.get_keyword(")")
+
+    def parse_port_type_and_name(self, port_list, if_list, def_port_type=""):
+        if_names = " ".join(if_list.keys())
+        if self.peek_choice("input output inout") != "":
+            port_direction = self.get_choice("input output inout")
+            port_type += " " + self.peek_and_get("reg wire logic", "wire")
+            port_size = self.get_array_size()
+            port_name = self.get_name("port name")
+        else:
+            if def_port_type=="":
+                if_name = self.get_choice(if_names)
+            else:
+                if_name = self.peek_and_get(if_names, def_port_type)
+            port_name = self.get_name("interface port name")
+            port_type = if_name;
+            port_size = ""
+            if_sigs = []
+            if "clk_name" in if_list[if_name]:
+                if_clk = if_list[if_name]["clk_name"]
+                if_sigs.append(f"input {port_name}__{if_clk}")
+            for s in if_list[if_name]["sig"]:
+                io = if_list[if_name]["sig"][s]["modport"]["mem"]
+                size = if_list[if_name]["sig"][s]["size"]
+                if_sigs.append(f"{io} {size} {port_name}__{s}")
+            if_sig_str = ", ".join(if_sigs)
+            comma = self.peek_choice(",", "")
+            if "__" in self.lines[self.g_line_i]:
+                self.lines[self.g_line_i] = self.lines[self.g_line_i].replace("//", f"  {if_sig_str}{comma} //",1)
+            else:
+                self.lines[self.g_line_i] = f"  {if_sig_str}{comma} // {self.lines[self.g_line_i]}"
+            from_str = f"{port_name}."
+            to_str = f"{port_name}__"
+            self.lines = [l.replace(from_str, to_str) for l in self.lines]
+        self.add_sig(port_list, port_name, port_type, port_size)
+        return port_type
 
 
     def parse_signal_declaration(self, sig_list):
@@ -225,8 +230,7 @@ class InterfaceParser(SVParser):
         iface_name = self.get_name()
         iface_dict = self.iface_dict[iface_name] = {}
         sig_list  = iface_dict["sig"] = {}
-        parm_list = iface_dict["parm"] = {}
-        self.parse_parameters(parm_list)
+        iface_dict["parm"] = self.parse_parameter_port_list()
         self.parse_clk(iface_dict)
         self.get_keyword(";")
         self.parse_signals(sig_list)
@@ -235,7 +239,7 @@ class InterfaceParser(SVParser):
         lnum2 = self.g_line_i
         self.lines = ["//" + l for l in self.lines[lnum1:lnum2]]
 
-        
+
     def slurp_tokens(self, filename):
         self.filename = filename;
         self.lines = self.slurp(filename).splitlines()
@@ -254,24 +258,24 @@ class InterfaceParser(SVParser):
 
 
     def parse_signals(self, sig_list):
-        token = self.peek_next_token()
+        token = self.peek_token()
         while token in "logic bit".split():
             sig_type = self.get_choice("logic bit")
             sig_size = self.get_from_to("[", "]", sep="")
             sig_name = self.get_name()
             self.add_sig(sig_list, sig_name, sig_type, sig_size)
-            token = self.peek_next_token()
+            token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
                 sig_name = self.get_name()
                 self.add_sig(sig_list, sig_name, sig_type, sig_size)
-                token = self.peek_next_token()
+                token = self.peek_token()
             self.get_keyword(";")
-            token = self.peek_next_token()
+            token = self.peek_token()
 
 
     def parse_modport(self, sig_list):
-        token = self.peek_next_token()
+        token = self.peek_token()
         while token == "modport":
             self.get_keyword("modport")
             modport_name = self.get_name()
@@ -286,11 +290,11 @@ class InterfaceParser(SVParser):
                     token = self.get_choice(", )")
                     if token == ")":
                         break
-                    token = self.peek_next_token()
+                    token = self.peek_token()
                     if token in "input output inout".split():
                         break
                 if token == ")":
                     break
             self.get_keyword(";")
-            token = self.peek_next_token()
+            token = self.peek_token()
 

@@ -26,7 +26,8 @@ module ram2p #(
   parameter DWID  = 16
 ) (
   ram_if porta,
-  ram_if portb
+  ram_if portb,
+  ram_if portc, portd, porte
 );
 
   reg [DWID-1:0] mem_array[0:DEPTH-1];

@@ -59,7 +59,7 @@ class MyLittleParser:
         self.lines_of_tokens = self.get_tokens(lines_no_comments)
 
     
-    def get_next_token(self):
+    def get_token(self):
         self.g_token_i += 1
         while (self.g_line_i < len(self.lines_of_tokens)) and (self.g_token_i >= len(self.lines_of_tokens[self.g_line_i])):
             self.g_token_i = 0
@@ -72,10 +72,10 @@ class MyLittleParser:
         return token
     
     
-    def peek_next_token(self):
+    def peek_token(self):
         save_line_i = self.g_line_i
         save_token_i = self.g_token_i
-        token = self.get_next_token();
+        token = self.get_token();
         self.g_line_i = save_line_i
         self.g_token_i = save_token_i
         return token;
@@ -97,17 +97,24 @@ class MyLittleParser:
     
     
     def find_token(self, needle):
-      token = self.get_next_token()
-      while (token != needle) and (token != ""):
-        token = self.get_next_token()
-      return token == needle
+        token = self.get_token()
+        while (token != needle) and (token != ""):
+            token = self.get_token()
+        return token == needle
+    
+    
+    def find_upto_token(self, needle):
+        found = self.find_token(needle)
+        if found:
+            self.get_prev_token()
+        return found
     
     
     def get_including_token(self, needle, sep=" "):
-        token = self.get_next_token()
+        token = self.get_token()
         tokens = token
         while (token != needle) and (token != ""):
-            token = self.get_next_token()
+            token = self.get_token()
             tokens += sep + token
         if token != needle:
             return ""
@@ -115,10 +122,10 @@ class MyLittleParser:
     
     
     def get_from_to(self, first, last, sep=" "):
-        token = self.peek_next_token()
+        token = self.peek_token()
         if first != "" and token != first:
             return ""
-        first_token = "" if first=="" else self.get_next_token()
+        first_token = "" if first=="" else self.get_token()
         the_rest = self.get_including_token(last, sep)
         if the_rest == "":
             return ""
@@ -138,7 +145,7 @@ class MyLittleParser:
 
         
     def get_keyword(self, keyword):
-        token = self.get_next_token()
+        token = self.get_token()
         if token != keyword:
             self.err(f"Expected '{keyword}', got '{token}'.")
         self.dbg_print(f"get_keyword: {token}")
@@ -146,40 +153,41 @@ class MyLittleParser:
 
     
     def get_optional_keyword(self, keyword):
-        token = self.get_next_token()
+        token = self.peek_token()
         if token != keyword:
-            self.get_prev_token()
             return ""
         self.dbg_print(f"get_optional_keyword: {token}")
-        return token
+        return self.get_token()
     
     
     def valid_name(self, token):
         return bool(re.match(r"^[\w\.]*$", token))
     
     
-    def get_name(self):
-        token = self.get_next_token()
+    def get_name(self, msg=""):
+        token = self.get_token()
         if not self.valid_name(token):
-            self.err(f"Expected identifier, got '{token}'.")
-        self.dbg_print(f"get_name: {token}")
+            msg = "identifer" if msg=="" else msg
+            self.err(f"Expected {msg}, got '{token}'.")
+        msg = "" if msg=="" else f" ({msg})"
+        self.dbg_print(f"get_name{msg}: {token}")
         return token
     
     
     def get_value(self):
-        token = self.get_next_token()
+        token = self.get_token()
         self.dbg_print(f"get_value: {token}")
         return token
     
     
     def get_unknown(self):
-        token = self.get_next_token()
+        token = self.get_token()
         self.dbg_print(f"get_unknown: {token}")
         return token
     
     
     def get_choice(self, choices):
-        token = self.get_next_token()
+        token = self.get_token()
         for choice in choices.split():
             if token == choice:
                 self.dbg_print(f"get_choice: {token}")
@@ -188,13 +196,22 @@ class MyLittleParser:
     
     
     def peek_and_get(self, choices, default_selection=""):
-        token = self.peek_next_token()
+        token = self.peek_token()
         if token in choices.split():
-            token = self.get_next_token()
+            token = self.get_token()
             self.dbg_print(f"peek_and_get: {token}")
             return token
         else:
             return default_selection
+
+    
+    def peek_choice(self, choices, default_selection=""):
+        token = self.peek_token()
+        if token in choices.split():
+            return token
+        else:
+            return default_selection
+
     
     def dbg_print(self, msg):
         if self.dbg:

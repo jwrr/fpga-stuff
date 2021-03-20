@@ -22,6 +22,7 @@ Converts of ramp2p.sv -> ram2p.v
 NEXT STEPS
 ----------
 
+* modports
 * convert ram2p_tb.v
 * convert ram2p_wrapper.v
 * get parameters working
