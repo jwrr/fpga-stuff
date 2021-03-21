@@ -18,7 +18,4 @@ for file in filelist:
 module_parser = svp.ModuleParser(sv_dict)
 module_parser.dbg = False
 for file in filelist:
-  module_parser.parse_module_declaration(file)
-
-
-
+    module_parser.parse_module_declaration(file)
