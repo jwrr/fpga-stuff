@@ -5,29 +5,14 @@
 //
 //------------------------------------------------------------------------------
 
-interface ram_if #(
-  parameter DEPTH = 256,
-  parameter AWID  = 8,
-  parameter DWID  = 16
-) (
- input bit clk
-);
-  logic we;
-  logic [DWID-1:0] din, dout;
-  logic [AWID-1:0]  addr;
-  modport mem  (input  we, din, addr, output dout);
-  modport cntl (output we, din, addr, input  dout);
-endinterface
-
-
 module ram2p #(
   parameter DEPTH = 256,
   parameter AWID  = 8,
   parameter DWID  = 16
 ) (
-  ram_if porta,
-  ram_if portb,
-  ram_if portc, portd, porte
+  ram_if.mem porta,
+  ram_if.mem portb,
+  ram_if.ctrl portc, portd, porte
 );
 
   reg [DWID-1:0] mem_array[0:DEPTH-1];

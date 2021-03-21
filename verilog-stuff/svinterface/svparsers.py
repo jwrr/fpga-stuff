@@ -169,21 +169,32 @@ class ModuleParser(SVParser):
             port_size = self.get_array_size()
             port_name = self.get_name("port name")
         else:
-            if def_port_type=="":
-                if_name = self.get_choice(if_names)
-            else:
-                if_name = self.peek_and_get(if_names, def_port_type)
+            port_type = self.peek_and_get_if(if_list, def_port_type)
+            if port_type == "":
+                self.err("Expecting port type or interface. Got '{self.peek_token()}'")
+                
+            if_name, if_modport = self.split_default(port_type, ".", 2, "")
+            if if_modport == "":
+                self.err(f"Modport required for interface '{port_type}'")
+        
+#             if_name_pieces = port_type.split(".")
+#             if len(if_name_pieces) < 2:
+#                 self.err(f"Modport required for interface '{port_type}'")
+#             if_name, if_modport = if_name_pieces
             port_name = self.get_name("interface port name")
-            port_type = if_name;
             port_size = ""
             if_sigs = []
             if "clk_name" in if_list[if_name]:
                 if_clk = if_list[if_name]["clk_name"]
                 if_sigs.append(f"input {port_name}__{if_clk}")
-            for s in if_list[if_name]["sig"]:
-                io = if_list[if_name]["sig"][s]["modport"]["mem"]
-                size = if_list[if_name]["sig"][s]["size"]
-                if_sigs.append(f"{io} {size} {port_name}__{s}")
+            for signame in if_list[if_name]["sig"]:
+                sig = if_list[if_name]["sig"][signame]
+                if if_modport not in  sig["modport"]:
+                    print(sig["modport"])
+                    self.err(f"Undefined modport '{if_modport}' in interface '{if_name}'")
+                io = sig["modport"][if_modport]
+                size = sig["size"]
+                if_sigs.append(f"{io} {size} {port_name}__{signame}")
             if_sig_str = ", ".join(if_sigs)
             comma = self.peek_choice(",", "")
             if "__" in self.lines[self.g_line_i]:
@@ -195,6 +206,26 @@ class ModuleParser(SVParser):
             self.lines = [l.replace(from_str, to_str) for l in self.lines]
         self.add_sig(port_list, port_name, port_type, port_size)
         return port_type
+
+
+    def split_default(self, instring, delim="", num_pieces=2, default_val=""):
+        pieces = instring.split(delim)
+        pieces_found = len(pieces)
+        num_missing_pieces = num_pieces - pieces_found
+        if num_missing_pieces > 0:
+            for i in range(num_missing_pieces):
+                pieces.append(default_val)
+        return pieces
+
+
+    def peek_and_get_if(self, if_list, def_port_type):
+        if_name_modport = self.peek_token()
+        if_name_pieces = if_name_modport.split(".")
+        if if_name_pieces[0] in if_list.keys():
+            if_name_modport = self.get_name("interface type")
+        else:
+            if_name_modport = def_port_type
+        return if_name_modport
 
 
     def parse_signal_declaration(self, sig_list):
@@ -228,6 +259,8 @@ class InterfaceParser(SVParser):
             return
         lnum1 = self.g_line_i
         iface_name = self.get_name()
+        if iface_name in self.iface_dict:
+            self.err(f"Interface '{iface_name}' already defined")
         iface_dict = self.iface_dict[iface_name] = {}
         sig_list  = iface_dict["sig"] = {}
         iface_dict["parm"] = self.parse_parameter_port_list()
