@@ -27,6 +27,12 @@ import mylittleparser as mlp
 
 
 class SVParser(mlp.MyLittleParser):
+    def __init__(self):
+        self.sv_dict = {}
+        self.module_dict = self.sv_dict["module"] = {}
+        self.iface_dict = self.sv_dict["iface"] = {}
+        self.lines = []
+        self.filename = ""
 
     # parameter_port_list ::=
     #   '#' '(' {parameter_keyword? parameter_identifier '=' constant}* ')'
@@ -58,7 +64,7 @@ class SVParser(mlp.MyLittleParser):
             token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
-                sig_dict['name'] = self.get_name()
+                sig_dict["name"] = self.get_name()
                 self.add_sig(sig_list, sig_dict)
                 token = self.peek_token()
             self.get_keyword(";")
@@ -83,33 +89,36 @@ class SVParser(mlp.MyLittleParser):
         all_signals[name]["size"] = new_signal["size"]
         all_signals[name]["modport"] = {}
 
-
-# ============================================================================
-# ============================================================================
-
-
-class ModuleParser(SVParser):
-    def __init__(self, sv_dict):
-        self.sv_dict = sv_dict
-        self.module_dict = sv_dict["module"] = {}
-        self.lines = []
+    # ============================================================================
+    # ============================================================================
 
     # module_declaration ::=
     # module_ansi_header { non_port_module_item } endmodule
-    def parse_module_declaration(self, filename):
-        self.slurp_tokens(filename)
-        if not self.find_token("module"):
-            return
-        lnum1 = self.g_line_i
-        self.get_prev_token()
-        all_modules = self.module_dict
-        all_ifaces = self.sv_dict["iface"] if "iface" in self.sv_dict else {}
-        this_module_dict = self.parse_module_header(all_modules, all_ifaces)
-        sig_list = this_module_dict["sig"] = {}
+    def parse_module_declaration(self):
+        while self.find_token("module"):
+            lnum1 = self.g_line_i
+            self.get_prev_token()
+            all_modules = self.module_dict
+            all_ifaces = self.sv_dict["iface"]
+            module_dict = self.parse_module_header(all_modules, all_ifaces)
+            self.parse_module_item(all_modules, all_ifaces, module_dict)
+            self.get_keyword("endmodule")
+
+    def print_module(self, lnum1):
+        lnum2 = self.g_line_i + 1
+        for line in self.lines[lnum1:lnum2]:
+            print(line)
+
+    def parse_module_item(self, all_modules, all_ifaces, module_dict):
+        sig_list = module_dict["sig"] = {}
+
         token = self.peek_token()
         while token != "endmodule" and token != "":
             if token in "reg wire logic".split():
                 self.parse_signal_declaration(sig_list)
+            #            elsif self.is_interface():
+            #                 self.parse_signal_declaration(sig_list)
+
             #             elif token == 'assign':
             #                 self.parse_assign()
             #             elif token == 'always initial':
@@ -119,10 +128,6 @@ class ModuleParser(SVParser):
             else:
                 token = self.get_unknown()
             token = self.peek_token()
-        self.get_keyword("endmodule")
-        lnum2 = self.g_line_i + 1
-        for line in self.lines[lnum1:lnum2]:
-            print(line)
 
     def parse_module_header(self, all_modules, all_ifaces):
         return self.parse_module_ansi_header(all_modules, all_ifaces)
@@ -194,7 +199,7 @@ class ModuleParser(SVParser):
             sig = if_dict["sig"][signame]
             if if_modport not in sig["modport"]:
                 err_msg = f"Undefined modport '{if_modport}' "
-                err_msg += f"in interface '{if_name}'"
+                err_msg += f"in interface '{port_name}'"
                 self.err(err_msg)
             io = sig["modport"][if_modport]
             size = sig["size"]
@@ -258,41 +263,29 @@ class ModuleParser(SVParser):
             if token == ";":
                 break
 
+    # ============================================================================
+    # ============================================================================
 
-# ============================================================================
-# ============================================================================
+    def parse_interface_declaration(self):
+        while self.find_token("interface"):
+            lnum1 = self.g_line_i
+            iface_name = self.get_name()
+            if iface_name in self.iface_dict:
+                self.err(f"Interface '{iface_name}' already defined")
+            iface_dict = self.iface_dict[iface_name] = {}
+            sig_list = iface_dict["sig"] = {}
+            iface_dict["parm"] = self.parse_parameter_port_list()
+            self.parse_clk(iface_dict)
+            self.get_keyword(";")
+            self.parse_signals(sig_list)
+            self.parse_modport(sig_list)
+            self.get_keyword("endinterface")
+            self.comment_out_interface(lnum1)
 
-
-class InterfaceParser(SVParser):
-    def __init__(self, sv_dict):
-        self.iface_dict = sv_dict["iface"] = {}
-        self.lines = []
-        self.filename = ""
-
-    def parse_interface(self, filename):
-        self.slurp_tokens(filename)
-        if not self.find_token("interface"):
-            return
-        lnum1 = self.g_line_i
-        iface_name = self.get_name()
-        if iface_name in self.iface_dict:
-            self.err(f"Interface '{iface_name}' already defined")
-        iface_dict = self.iface_dict[iface_name] = {}
-        sig_list = iface_dict["sig"] = {}
-        iface_dict["parm"] = self.parse_parameter_port_list()
-        self.parse_clk(iface_dict)
-        self.get_keyword(";")
-        self.parse_signals(sig_list)
-        self.parse_modport(sig_list)
-        self.get_keyword("endinterface")
-        lnum2 = self.g_line_i
-        self.lines = ["//" + line for line in self.lines[lnum1:lnum2]]
-
-    def slurp_tokens(self, filename):
-        self.filename = filename
-        self.lines = self.slurp(filename).splitlines()
-        lines_no_comments = self.remove_comments(self.lines)
-        self.lines_of_tokens = self.get_tokens(lines_no_comments)
+    def comment_out_interface(self, lnum1):
+        lnum2 = self.g_line_i + 1
+        for linenum in range(lnum1, lnum2):
+            self.lines[linenum] = "// " + self.lines[linenum]
 
     def parse_clk(self, iface_dict):
         if self.get_optional_keyword("("):
@@ -344,3 +337,18 @@ class InterfaceParser(SVParser):
                     break
             self.get_keyword(";")
             token = self.peek_token()
+
+    # ============================================================================
+    # ============================================================================
+
+    def to_verilog(self, filename):
+        self.slurp_tokens(filename)
+        self.parse_interface_declaration()
+        self.reset_tokens()
+        self.parse_module_declaration()
+        self.print_file()
+
+    def convert_all_to_verilog(self, filelist):
+        self.dbg = False
+        for file in filelist:
+            self.to_verilog(file)

@@ -51,9 +51,18 @@ class MyLittleParser:
         return tokens
 
     def slurp_tokens(self, filename):
+        self.filename = filename
         self.lines = self.slurp(filename).splitlines()
         lines_no_comments = self.remove_comments(self.lines)
         self.lines_of_tokens = self.get_tokens(lines_no_comments)
+
+    def reset_tokens(self, token_idx=0):
+        self.g_token_i = 0
+        self.g_line_i = 0
+
+    def print_file(self):
+        for line in self.lines:
+            print(line)
 
     def get_token(self):
         self.g_token_i += 1
