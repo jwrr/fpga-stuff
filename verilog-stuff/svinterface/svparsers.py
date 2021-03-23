@@ -59,35 +59,32 @@ class SVParser(mlp.MyLittleParser):
             sig_type = self.get_choice("logic bit")
             sig_size = self.get_from_to("[", "]", sep="")
             sig_name = self.get_name()
-            sig_dict = {"name": sig_name, "type": sig_type, "size": sig_size}
-            self.add_sig(sig_list, sig_dict)
+            sig = {"name": sig_name, "type": sig_type, "size": sig_size}
+            self.add_sig(sig_list, sig)
             token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
-                sig_dict["name"] = self.get_name()
-                self.add_sig(sig_list, sig_dict)
+                sig["name"] = self.get_name()
+                self.add_sig(sig_list, sig)
                 token = self.peek_token()
             self.get_keyword(";")
             token = self.peek_token()
 
-    def get_init_value(self):
-        token = self.peek_and_get("=")
+    def get_optional_init_value(self):
+        token = self.peek_and_get("=", "")
         if token == "":
             return ""
         value = get_value()
         return value
 
-    def get_array_size(self):
+    def get_optional_array_size(self):
         port_size = self.get_from_to("[", "]", sep="")
 
     def add_sig(self, all_signals, new_signal):
         name = new_signal["name"]
         if name in all_signals.keys():
             self.err(f"Duplicate signal. Signal '{name}' already defined.")
-        all_signals[name] = {}
-        all_signals[name]["type"] = new_signal["type"]
-        all_signals[name]["size"] = new_signal["size"]
-        all_signals[name]["modport"] = {}
+        all_signals[name] = new_signal
 
     # ============================================================================
     # ============================================================================
@@ -100,8 +97,8 @@ class SVParser(mlp.MyLittleParser):
             self.get_prev_token()
             all_modules = self.module_dict
             all_ifaces = self.sv_dict["iface"]
-            module_dict = self.parse_module_header(all_modules, all_ifaces)
-            self.parse_module_item(all_modules, all_ifaces, module_dict)
+            module_name = self.parse_module_header(all_modules, all_ifaces)
+            self.parse_module_item(all_modules, all_ifaces, module_name)
             self.get_keyword("endmodule")
 
     def print_module(self, lnum1):
@@ -109,15 +106,14 @@ class SVParser(mlp.MyLittleParser):
         for line in self.lines[lnum1:lnum2]:
             print(line)
 
-    def parse_module_item(self, all_modules, all_ifaces, module_dict):
-        sig_list = module_dict["sig"] = {}
-
+    def parse_module_item(self, all_modules, all_ifaces, module_name):
+        if module_name not in all_modules:
+            self.err(f"module '{module_name}' not defined")
+        all_sigs = all_modules[module_name]["sig"] = {}
         token = self.peek_token()
         while token != "endmodule" and token != "":
-            if token in "reg wire logic".split():
-                self.parse_signal_declaration(sig_list)
-            #            elsif self.is_interface():
-            #                 self.parse_signal_declaration(sig_list)
+            if self.is_type(token, all_ifaces):
+                self.parse_signal_declaration(all_sigs, all_ifaces)
 
             #             elif token == 'assign':
             #                 self.parse_assign()
@@ -135,16 +131,16 @@ class SVParser(mlp.MyLittleParser):
     # module_ansi_header ::=
     # module_keyword module_identifier \
     #     [ parameter_port_list ] [ list_of_port_declarations ] ;
-    def parse_module_ansi_header(self, all_modules_dict, all_ifaces):
+    def parse_module_ansi_header(self, all_modules, all_ifaces):
         self.get_keyword("module")
         module_name = self.get_name()
-        all_modules_dict[module_name] = {}
-        module_dict = all_modules_dict[module_name]
+        all_modules[module_name] = {}
+        module_dict = all_modules[module_name]
         port_list = module_dict["port"] = {}
         module_dict["parm"] = self.parse_parameter_port_list()
         module_dict["port"] = self.parse_list_of_port_declarations(all_ifaces)
         self.get_keyword(";")
-        return module_dict
+        return module_name
 
     # list_of_port_declarations
     # '(' port_type port_name { ',' port_type? portname}*  ')'
@@ -175,38 +171,45 @@ class SVParser(mlp.MyLittleParser):
         if port_dir == "":
             port_dir = self.get_choice("input output inout")
         port_type = f"{port_dir} {self.peek_and_get('reg wire logic', 'wire')}"
-        port_size = self.get_array_size()
+        port_size = self.get_optional_array_size()
         port_name = self.get_name("port name")
         return {port_name, port_type, port_size}
 
     def get_if_port(self, if_list, port_type=""):
         port_size = ""  # arrays of interfaces not supported yet
-        if_name, if_modport = self.split_name_modport(port_type)
+        if_name, if_modport_name = self.split_name_modport(port_type)
         port_name = self.get_name("interface port name")
         if_dict = if_list[if_name]
-        self.expand_if_port(if_dict, if_modport, port_name)
+        self.expand_if_port(if_dict, if_modport_name, port_name)
         from_str = f"{port_name}."
         to_str = f"{port_name}__"
         self.lines = [line.replace(from_str, to_str) for line in self.lines]
         return {"name": port_name, "type": port_type, "size": port_size}
 
-    def expand_if_port(self, if_dict, if_modport, port_name):
+    def expand_if_port(self, if_dict, if_modport_name, port_name):
         if_sigs = []
         if "clk_name" in if_dict:
             if_clk = if_dict["clk_name"]
             if_sigs.append(f"input {port_name}__{if_clk}")
-        for signame in if_dict["sig"]:
-            sig = if_dict["sig"][signame]
-            if if_modport not in sig["modport"]:
-                err_msg = f"Undefined modport '{if_modport}' "
-                err_msg += f"in interface '{port_name}'"
+        for sig_name in if_dict["sig"]:
+            if_sig = if_dict["sig"][sig_name]
+            valid_modport = (if_modport_name=="" or
+                             if_modport_name in if_sig["modport"])
+            if not valid_modport:
+                print(f"signal '{sig_name}'", if_sig["modport"])
+                err_msg = f"Undefined modport '{if_modport_name}' "
+                err_msg += f"for interface signal '{sig_name}'"
                 self.err(err_msg)
-            io = sig["modport"][if_modport]
-            size = sig["size"]
-            if_sigs.append(f"{io} {size} {port_name}__{signame}")
-        self.update_lines_for_if_port(if_sigs)
+            if if_modport_name == "":
+                size = if_sig["size"]
+                if_sigs.append(f"wire {size} {port_name}__{sig_name};")
+            else:
+                io = if_sig["modport"][if_modport_name]
+                size = if_sig["size"]
+                if_sigs.append(f"{io} {size} {port_name}__{sig_name}")
+        self.update_line_for_if_port(if_sigs)
 
-    def update_lines_for_if_port(self, if_sigs):
+    def update_line_for_if_port(self, if_sigs):
         if_sig_str = ", ".join(if_sigs)
         comma = self.peek_choice(",", "")
         lines = self.lines
@@ -227,10 +230,10 @@ class SVParser(mlp.MyLittleParser):
         return port_type
 
     def split_name_modport(self, port_type):
-        if_name, if_modport = self.split_default(port_type, ".", 2, "")
-        if if_modport == "":
+        if_name, if_modport_name = self.split_default(port_type, ".", 2, "")
+        if if_modport_name == "":
             self.err(f"Modport required for interface '{port_type}'")
-        return if_name, if_modport
+        return if_name, if_modport_name
 
     def split_default(self, instring, delim="", num_pieces=2, default_val=""):
         pieces = instring.split(delim)
@@ -250,21 +253,33 @@ class SVParser(mlp.MyLittleParser):
             if_name_modport = def_port_type
         return if_name_modport
 
-    def parse_signal_declaration(self, sig_list):
-        sig_type = self.peek_and_get("reg wire logic")
+    def parse_signal_declaration(self, sig_list, if_list = {}):
+        sig_type = self.peek_and_get("reg wire logic integer", "")
         if sig_type == "":
-            return False
-        while True:
-            sig_packed_size = self.get_array_size()
-            sig_name = self.get_name()
-            sig_unpacked_size = self.get_array_size()
-            sig_init_value = self.get_init_value()
+            if_name = self.get_name("interface name")
+            if not self.is_interface(if_name, if_list):
+                self.err(f"Expected type or interface name. got '{token}'")
+        sig = {}
+        sig['type'] = sig_type
+        sig['packed_size'] = self.get_optional_array_size()
+        repeat = True
+        while repeat:
+            sig['name'] = self.get_name("signal name")
+            sig['unpacked_size'] = self.get_optional_array_size()
+            sig['init_value'] = self.get_optional_init_value()
+#             if_dict = if_list[sig_type]
+#             self.expand_if_port(if_dict, "", sig['name'])
+            self.add_sig(sig_list, sig)
             token = self.get_choice(", ;")
-            if token == ";":
-                break
+            repeat = token == ","
 
-    # ============================================================================
-    # ============================================================================
+    def is_type(self, token, all_ifaces):
+        if token in "reg wire logic integer".split():
+            return True
+        return self.is_interface(token, all_ifaces)
+
+    def is_interface(self, token, interface_list):
+        return token in interface_list
 
     def parse_interface_declaration(self):
         while self.find_token("interface"):
@@ -302,14 +317,14 @@ class SVParser(mlp.MyLittleParser):
             sig_type = self.get_choice("logic bit")
             sig_size = self.get_from_to("[", "]", sep="")
             sig_name = self.get_name()
-            sig_dict = {"name": sig_name, "type": sig_type, "size": sig_size}
-            self.add_sig(sig_list, sig_dict)
+            sig = {"name": sig_name, "type": sig_type, "size": sig_size}
+            self.add_sig(sig_list, sig)
             token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
                 sig_name = self.get_name()
-                sig_dict["name"] = sig_name
-                self.add_sig(sig_list, sig_dict)
+                sig["name"] = sig_name
+                self.add_sig(sig_list, sig)
                 token = self.peek_token()
             self.get_keyword(";")
             token = self.peek_token()
@@ -326,6 +341,8 @@ class SVParser(mlp.MyLittleParser):
                     sig_name = self.get_name()
                     if sig_name not in sig_list:
                         self.err(f"Modport signal '{sig_name}' not defined.")
+                    if "modport" not in sig_list[sig_name]:
+                        sig_list[sig_name]["modport"] = {}
                     sig_list[sig_name]["modport"][modport_name] = modport_dir
                     token = self.get_choice(", )")
                     if token == ")":
@@ -349,6 +366,5 @@ class SVParser(mlp.MyLittleParser):
         self.print_file()
 
     def convert_all_to_verilog(self, filelist):
-        self.dbg = False
         for file in filelist:
             self.to_verilog(file)

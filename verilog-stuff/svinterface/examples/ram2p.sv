@@ -31,6 +31,12 @@ module ram2p #(
   reg [DWID-1:0] mem_array[0:DEPTH-1];
   reg [DWID-1:0] porta.dout;
   reg [DWID-1:0] portb.dout;
+  wire read_enable;
+  wire write_enable1, write_enable2;
+  ram_if abc;
+  bus_if def, ghi, lmn;
+  
+  
 
   always @(posedge porta.clk) begin
     if (porta.we) begin
