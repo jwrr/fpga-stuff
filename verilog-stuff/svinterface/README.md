@@ -30,5 +30,10 @@ NEXT STEPS
 * convert ram2p_wrapper.v
 * get parameters working
 
-
+* All interface signals are interpretted as wires.
+  * Convert reg [15:0] bus_if.data; -> reg [15:0] bus_if__data_r; assign bus_if__data = bus_if__data_r; 
+  * The above shouldn't be supported.  Instead
+    * reg [15:0] rdata; assign bus_if.rdata = rdata;
+  * Or: convert all rhs to if__signame, convert assigns to if__signame
+    convert lhs in always block to reg if__signame_r; assign if__signame = if_signame;   
 

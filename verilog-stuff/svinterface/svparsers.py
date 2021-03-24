@@ -112,7 +112,7 @@ class SVParser(mlp.MyLittleParser):
         all_sigs = all_modules[module_name]["sig"] = {}
         token = self.peek_token()
         while token != "endmodule" and token != "":
-            if self.is_type(token, all_ifaces):
+            if self.is_data_type(token, all_ifaces):
                 self.parse_signal_declaration(all_sigs, all_ifaces)
 
             #             elif token == 'assign':
@@ -209,6 +209,17 @@ class SVParser(mlp.MyLittleParser):
                 if_sigs.append(f"{io} {size} {port_name}__{sig_name}")
         self.update_line_for_if_port(if_sigs)
 
+    def expand_if_data_declaration(self, if_dict, port_name):
+        if_sigs = []
+        if "clk_name" in if_dict:
+            if_clk = if_dict["clk_name"]
+            if_sigs.append(f"wire {port_name}__{if_clk};")
+        for sig_name in if_dict["sig"]:
+            if_sig = if_dict["sig"][sig_name]
+            size = if_dict["sig"][sig_name].get("size","")
+            if_sigs.append(f"wire {size} {port_name}__{sig_name};")
+        self.update_line_for_if_data_declaration(if_sigs)
+
     def update_line_for_if_port(self, if_sigs):
         if_sig_str = ", ".join(if_sigs)
         comma = self.peek_choice(",", "")
@@ -220,6 +231,18 @@ class SVParser(mlp.MyLittleParser):
             )
         else:
             lines[linenum] = f"  {if_sig_str}{comma} // {lines[linenum]}"
+
+    def update_line_for_if_data_declaration(self, if_sigs):
+        if_sig_str = " ".join(if_sigs)
+        comma = self.peek_choice(",", "")
+        lines = self.lines
+        linenum = self.g_line_i
+        if "__" in lines[linenum]:
+            lines[linenum] = lines[linenum].replace(
+                "//", f"  {if_sig_str} //", 1
+            )
+        else:
+            lines[linenum] = f"  {if_sig_str} // {lines[linenum]}"
 
     def peek_and_get_port_type(self, if_list, def_port_type):
         port_type = self.peek_and_get_if(if_list, def_port_type)
@@ -255,10 +278,12 @@ class SVParser(mlp.MyLittleParser):
 
     def parse_signal_declaration(self, sig_list, if_list = {}):
         sig_type = self.peek_and_get("reg wire logic integer", "")
-        if sig_type == "":
-            if_name = self.get_name("interface name")
-            if not self.is_interface(if_name, if_list):
+        is_builtin_type = sig_type != ""
+        if not is_builtin_type:
+            sig_type = self.get_name("interface name")
+            if not self.is_interface(sig_type, if_list):
                 self.err(f"Expected type or interface name. got '{token}'")
+        is_interface = not is_builtin_type
         sig = {}
         sig['type'] = sig_type
         sig['packed_size'] = self.get_optional_array_size()
@@ -267,13 +292,13 @@ class SVParser(mlp.MyLittleParser):
             sig['name'] = self.get_name("signal name")
             sig['unpacked_size'] = self.get_optional_array_size()
             sig['init_value'] = self.get_optional_init_value()
-#             if_dict = if_list[sig_type]
-#             self.expand_if_port(if_dict, "", sig['name'])
             self.add_sig(sig_list, sig)
-            token = self.get_choice(", ;")
-            repeat = token == ","
+            if is_interface:
+                if_dict = if_list[sig_type]
+                self.expand_if_data_declaration(if_dict, sig['name'])
+            repeat = self.get_choice(", ;") == ","
 
-    def is_type(self, token, all_ifaces):
+    def is_data_type(self, token, all_ifaces):
         if token in "reg wire logic integer".split():
             return True
         return self.is_interface(token, all_ifaces)
