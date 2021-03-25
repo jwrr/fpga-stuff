@@ -72,7 +72,9 @@ module ram5p #(
 
   always @(posedge porta.clk) begin
     if (porta.we) begin
-      mem_array[porta.addr] <= porta.din;
+      if (porta.addr < DEPTH) begin
+        mem_array[porta.addr] <= porta.din;
+      end
     end
     porta_dout <= mem_array[porta.addr];
   end

@@ -114,6 +114,8 @@ class SVParser(mlp.MyLittleParser):
         while token != "endmodule" and token != "":
             if self.is_data_type(token, all_ifaces):
                 self.parse_signal_declaration(all_sigs, all_ifaces)
+            elif self.is_procedural_block(token):
+                self.parse_procedural_block(all_sigs, all_ifaces)
 
             #             elif token == 'assign':
             #                 self.parse_assign()
@@ -124,6 +126,30 @@ class SVParser(mlp.MyLittleParser):
             else:
                 token = self.get_unknown()
             token = self.peek_token()
+
+    def is_procedural_block(self, token):
+        keywords = "always always_comb always_latch always_ff "
+        keywords += "initial"
+        return token in keywords.split()
+
+    def parse_procedural_block(self, all_sigs, all_ifaces):
+        block_type = self.get_token("procedureal block keyword")
+        sensitivity_list = self.get_optional_sensitivity_list(all_sigs, all_ifaces)
+        token = self.peek_and_get("begin")
+        if token == "begin":
+            begin_end_count = 1
+            repeat = True
+            while repeat:
+                token = self.get_token("in procedural block")
+                if token == "begin":
+                    begin_end_count += 1
+                elif token == "end":
+                    begin_end_count -= 1
+                repeat = begin_end_count != 0
+
+    def get_optional_sensitivity_list(self, all_sigs, all_ifaces):
+        sensivitity_list_str = self.get_from_to("@", ")", " ")
+        return sensivitity_list_str
 
     def parse_module_header(self, all_modules, all_ifaces):
         return self.parse_module_ansi_header(all_modules, all_ifaces)
@@ -193,9 +219,11 @@ class SVParser(mlp.MyLittleParser):
             if_sigs.append(f"input {port_name}__{if_clk}")
         for sig_name in if_dict["sig"]:
             if_sig = if_dict["sig"][sig_name]
-            valid_modport = (if_modport_name=="" or
-                             if_modport_name in if_sig["modport"])
-            if not valid_modport:
+
+            modport_defined = if_modport_name != ""
+            modport_doesnt_exists = if_modport_name not in if_sig["modport"]
+            invalid_modport = modport_defined and modport_doesnt_exists
+            if invalid_modport:
                 print(f"signal '{sig_name}'", if_sig["modport"])
                 err_msg = f"Undefined modport '{if_modport_name}' "
                 err_msg += f"for interface signal '{sig_name}'"
@@ -216,7 +244,7 @@ class SVParser(mlp.MyLittleParser):
             if_sigs.append(f"wire {port_name}__{if_clk};")
         for sig_name in if_dict["sig"]:
             if_sig = if_dict["sig"][sig_name]
-            size = if_dict["sig"][sig_name].get("size","")
+            size = if_dict["sig"][sig_name].get("size", "")
             if_sigs.append(f"wire {size} {port_name}__{sig_name};")
         self.update_line_for_if_data_declaration(if_sigs)
 
@@ -276,7 +304,7 @@ class SVParser(mlp.MyLittleParser):
             if_name_modport = def_port_type
         return if_name_modport
 
-    def parse_signal_declaration(self, sig_list, if_list = {}):
+    def parse_signal_declaration(self, sig_list, if_list={}):
         sig_type = self.peek_and_get("reg wire logic integer", "")
         is_builtin_type = sig_type != ""
         if not is_builtin_type:

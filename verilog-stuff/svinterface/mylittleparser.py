@@ -64,7 +64,7 @@ class MyLittleParser:
         for line in self.lines:
             print(line)
 
-    def get_token(self):
+    def get_token(self, msg=""):
         self.g_token_i += 1
         while (self.g_line_i < len(self.lines_of_tokens)) and (
             self.g_token_i >= len(self.lines_of_tokens[self.g_line_i])
@@ -76,6 +76,8 @@ class MyLittleParser:
             return ""
 
         token = self.lines_of_tokens[self.g_line_i][self.g_token_i]
+        if msg != "":
+            self.dbg_print(f"get_token ({msg}): {token}")
         return token
 
     def peek_token(self):

@@ -25,7 +25,10 @@ $ iverilog x.v
 NEXT STEPS
 ----------
 
-* modports - done
+* handle modports - done
+* expand "abc_if x _;" to "wire x__we; wire [7:0] x__wdata; ..." - done
+* expand interfaces in instantiations - next
+
 * convert ram2p_tb.v
 * convert ram2p_wrapper.v
 * get parameters working
