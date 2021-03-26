@@ -44,7 +44,7 @@ class SVParser(mlp.MyLittleParser):
         self.get_keyword("(")
         while True:
             self.get_optional_keyword("parameter")
-            parm_name = self.get_name()
+            parm_name = self.get_name("parameter name")
             self.get_keyword("=")
             parm_value = self.get_value()
             parms[parm_name] = parm_value
@@ -58,13 +58,13 @@ class SVParser(mlp.MyLittleParser):
         while token in "logic bit".split():
             sig_type = self.get_choice("logic bit")
             sig_size = self.get_from_to("[", "]", sep="")
-            sig_name = self.get_name()
+            sig_name = self.get_name("signal name")
             sig = {"name": sig_name, "type": sig_type, "size": sig_size}
             self.add_sig(sig_list, sig)
             token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
-                sig["name"] = self.get_name()
+                sig["name"] = self.get_name("signal name")
                 self.add_sig(sig_list, sig)
                 token = self.peek_token()
             self.get_keyword(";")
@@ -116,6 +116,8 @@ class SVParser(mlp.MyLittleParser):
                 self.parse_signal_declaration(all_sigs, all_ifaces)
             elif self.is_procedural_block(token):
                 self.parse_procedural_block(all_sigs, all_ifaces)
+            elif self.is_module_instance(token,all_modules):
+                self.parse_module_instance(all_sigs, all_ifaces, all_modules)
 
             #             elif token == 'assign':
             #                 self.parse_assign()
@@ -126,6 +128,35 @@ class SVParser(mlp.MyLittleParser):
             else:
                 token = self.get_unknown()
             token = self.peek_token()
+            
+    def is_module_instance(self, token, all_modules):
+        return token in all_modules
+
+    def parse_module_instance(self, all_sigs, all_ifaces, all_modules):
+        module_type = self.get_name("module type")
+        this_module = all_modules[module_type]
+        module_parms = self.get_optional_parameters(this_module)
+        module_name = self.get_name("module name")
+        self.get_keyword("(")
+        while self.peek_and_get(")") != ")":
+            self.get_named_port_connection(this_module, all_sigs, all_ifaces)
+            self.peek_and_get(",")
+        self.get_keyword(";")
+         
+    def get_optional_parameters(self, this_module):
+        parameters = self.get_from_to("@", ")", " ")
+        return parameters
+        
+    def get_named_port_connection(self, this_module, all_sigs, all_ifaces):
+        dotted_port_name = self.get_name("dotted port name")
+        if dotted_port_name[0] != ".":
+            err_msg = "Only named ports are supported. "
+            err_msg += "Named ports must start with '.'. "
+            err_msg += f"'{dotted_port_name}' does not start with '.'"
+            self.err(err_msg)
+        self.get_keyword("(")
+        signal_name = self.get_name("signal name")
+        self.get_keyword(")")
 
     def is_procedural_block(self, token):
         keywords = "always always_comb always_latch always_ff "
@@ -159,7 +190,7 @@ class SVParser(mlp.MyLittleParser):
     #     [ parameter_port_list ] [ list_of_port_declarations ] ;
     def parse_module_ansi_header(self, all_modules, all_ifaces):
         self.get_keyword("module")
-        module_name = self.get_name()
+        module_name = self.get_name("module name")
         all_modules[module_name] = {}
         module_dict = all_modules[module_name]
         port_list = module_dict["port"] = {}
@@ -337,7 +368,7 @@ class SVParser(mlp.MyLittleParser):
     def parse_interface_declaration(self):
         while self.find_token("interface"):
             lnum1 = self.g_line_i
-            iface_name = self.get_name()
+            iface_name = self.get_name("interface name")
             if iface_name in self.iface_dict:
                 self.err(f"Interface '{iface_name}' already defined")
             iface_dict = self.iface_dict[iface_name] = {}
@@ -359,7 +390,7 @@ class SVParser(mlp.MyLittleParser):
         if self.get_optional_keyword("("):
             self.get_keyword("input")
             clk_type = self.get_choice("logic bit")
-            clk_name = self.get_name()
+            clk_name = self.get_name("clock name")
             iface_dict["clk_name"] = clk_name
             iface_dict["clk_type"] = clk_type
             self.get_keyword(")")
@@ -369,13 +400,13 @@ class SVParser(mlp.MyLittleParser):
         while token in "logic bit".split():
             sig_type = self.get_choice("logic bit")
             sig_size = self.get_from_to("[", "]", sep="")
-            sig_name = self.get_name()
+            sig_name = self.get_name("signal name")
             sig = {"name": sig_name, "type": sig_type, "size": sig_size}
             self.add_sig(sig_list, sig)
             token = self.peek_token()
             while token == ",":
                 self.get_keyword(",")
-                sig_name = self.get_name()
+                sig_name = self.get_name("signal name")
                 sig["name"] = sig_name
                 self.add_sig(sig_list, sig)
                 token = self.peek_token()
@@ -386,12 +417,12 @@ class SVParser(mlp.MyLittleParser):
         token = self.peek_token()
         while token == "modport":
             self.get_keyword("modport")
-            modport_name = self.get_name()
+            modport_name = self.get_name("modport name")
             self.get_keyword("(")
             while True:
                 modport_dir = self.get_choice("input output inout")
                 while True:
-                    sig_name = self.get_name()
+                    sig_name = self.get_name("signal name")
                     if sig_name not in sig_list:
                         self.err(f"Modport signal '{sig_name}' not defined.")
                     if "modport" not in sig_list[sig_name]:

@@ -85,6 +85,11 @@ module ram5p #(
     end
     portb_dout <= mem_array[portb.addr];
   end
+  
+  ram2p u_ram2p (
+    .porta(if_a),
+    .portb(if_b)
+  );
 
 endmodule
 
