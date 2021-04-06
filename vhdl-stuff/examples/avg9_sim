@@ -1,0 +1,4 @@
+ghdl -a --std=08 avg9.vhd tb_pkg.vhd tb_avg9.vhd
+ghdl -e --std=08 tb
+ghdl -r --std=08 tb --vcd=waves.vcd
+

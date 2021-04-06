@@ -17,8 +17,8 @@ library work;
 
 entity avg9 is
   generic (
-    DWIDTH  : integer := 16
-    NUM_INPUTS : integer := 9;
+    DWIDTH  : integer := 16;
+    NUM_INPUTS : integer := 9
 );
   port (
     clk : std_logic;
@@ -34,14 +34,13 @@ entity avg9 is
     i_data_8  : in  std_logic_vector(DWIDTH-1 downto 0);
     i_data_v  : in  std_logic;
     o_avg     : out std_logic_vector(DWIDTH-1 downto 0);
-    o_avg_v   : out std_logic;
+    o_avg_v   : out std_logic
   );
 end entity avg9;
 
 architecture rtl of avg9 is
 
-  constant coef_const : positive := positive(256*1024/NUM_INPUTS);
-  signal   coef : positive;
+  signal coef : unsigned(19 downto 0) := to_unsigned(integer(256*1024/NUM_INPUTS), 20);
   signal sum_0_0 : unsigned(DWIDTH-1 downto 0);
   signal sum_0_1 : unsigned(DWIDTH-1 downto 0);
   signal sum_0_2 : unsigned(DWIDTH-1 downto 0);
@@ -77,13 +76,12 @@ architecture rtl of avg9 is
   signal sum_3_1 : unsigned(DWIDTH+2 downto 0);
 
   signal sum_4_0 : unsigned(DWIDTH+3 downto 0);
-  signal prod    : unsigned(DWIDTH+3+18) downto 0);
+  signal prod    : unsigned(sum_4_0'length+coef'length-1 downto 0);
   
   signal data_v  : std_logic_vector(5 downto 0);
 
 begin
 
-  coef <= coef_const;
   o_avg_v <= data_v(data_v'high);
 
   process(clk, rst)
@@ -91,7 +89,7 @@ begin
     if rst then
       data_v <= (others => '0');
     elsif rising_edge(clk) then
-      data_v <= (data_v'high-1 downto 0) & i_data_v;
+      data_v <= data_v(data_v'high-1 downto 0) & i_data_v;
       sum_0_0 <= unsigned(i_data_0);
       sum_0_1 <= unsigned(i_data_1);
       sum_0_2 <= unsigned(i_data_2);

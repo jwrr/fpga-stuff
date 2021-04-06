@@ -1,0 +1,5 @@
+make BLOCK=bigadd_16
+make BLOCK=cnt
+make BLOCK=gater
+make BLOCK=reg
+make BLOCK=srff

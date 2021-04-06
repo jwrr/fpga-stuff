@@ -1,0 +1,151 @@
+make results.xml
+make[1]: Entering directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+mkdir -p sim_build
+\
+/usr/local/bin/ghdl -i  --std=08  --workdir=sim_build --work=work /home/jwrr/github/fpga-stuff/vhdl-stuff/examples/bigadd_16.vhd && \
+/usr/local/bin/ghdl -m  --std=08  --workdir=sim_build -Psim_build --work=work bigadd_16
+make[1]: Leaving directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+make results.xml
+make[1]: Entering directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+\
+/usr/local/bin/ghdl -i  --std=08  --workdir=sim_build --work=work /home/jwrr/github/fpga-stuff/vhdl-stuff/examples/cnt.vhd && \
+/usr/local/bin/ghdl -m  --std=08  --workdir=sim_build -Psim_build --work=work cnt
+MODULE=test_cnt TESTCASE= TOPLEVEL=cnt TOPLEVEL_LANG=vhdl \
+/usr/local/bin/ghdl -r  --std=08 --workdir=sim_build -Psim_build --work=work cnt --vpi=/home/jwrr/.local/lib/python3.8/site-packages/cocotb/libs/libcocotbvpi_ghdl.so --vcd=waves.vcd 
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:77   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+     -.--ns INFO     cocotb.gpi                         ../gpi/GpiCommon.cpp:105  in gpi_print_registered_impl       VPI registered
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:240  in _embed_sim_init                 Python interpreter initialized and cocotb loaded!
+     0.00ns INFO     Running on GHDL version 2.0.0-dev (1.0.0.r78.g009f0b95) [Dunoon edition]
+     0.00ns INFO     Running tests with cocotb v1.5.0 from /home/jwrr/.local/lib/python3.8/site-packages/cocotb
+     0.00ns INFO     Seeding Python random module with 1617666960
+     0.00ns WARNING  Pytest not found, assertion rewriting will not occur
+     0.00ns INFO     Found test test_cnt.test_cnt_simple
+     0.00ns INFO     Running test 1/1: test_cnt_simple
+     0.00ns INFO     Starting test: "test_cnt_simple"
+                     Description:  Test basic functionality of counter
+ 10095.00ns INFO     Test Passed: test_cnt_simple
+ 10095.00ns INFO     Passed 1 tests (0 skipped)
+ 10095.00ns INFO     **********************************************************************************
+                     ** TEST                      PASS/FAIL  SIM TIME(NS)  REAL TIME(S)  RATIO(NS/S) **
+                     **********************************************************************************
+                     ** test_cnt.test_cnt_simple    PASS        10095.00          0.24     41461.84  **
+                     **********************************************************************************
+                     
+ 10095.00ns INFO     *************************************************************************************
+                     **                                 ERRORS : 0                                      **
+                     *************************************************************************************
+                     **                               SIM TIME : 10095.00 NS                            **
+                     **                              REAL TIME : 0.26 S                                 **
+                     **                        SIM / REAL TIME : 39155.35 NS/S                          **
+                     *************************************************************************************
+                     
+ 10095.00ns INFO     Shutting down...
+make[1]: Leaving directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+make results.xml
+make[1]: Entering directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+\
+/usr/local/bin/ghdl -i  --std=08  --workdir=sim_build --work=work /home/jwrr/github/fpga-stuff/vhdl-stuff/examples/gater.vhd && \
+/usr/local/bin/ghdl -m  --std=08  --workdir=sim_build -Psim_build --work=work gater
+MODULE=test_gater TESTCASE= TOPLEVEL=gater TOPLEVEL_LANG=vhdl \
+/usr/local/bin/ghdl -r  --std=08 --workdir=sim_build -Psim_build --work=work gater --vpi=/home/jwrr/.local/lib/python3.8/site-packages/cocotb/libs/libcocotbvpi_ghdl.so --vcd=waves.vcd 
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:77   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+     -.--ns INFO     cocotb.gpi                         ../gpi/GpiCommon.cpp:105  in gpi_print_registered_impl       VPI registered
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:240  in _embed_sim_init                 Python interpreter initialized and cocotb loaded!
+     0.00ns INFO     Running on GHDL version 2.0.0-dev (1.0.0.r78.g009f0b95) [Dunoon edition]
+     0.00ns INFO     Running tests with cocotb v1.5.0 from /home/jwrr/.local/lib/python3.8/site-packages/cocotb
+     0.00ns INFO     Seeding Python random module with 1617666961
+     0.00ns WARNING  Pytest not found, assertion rewriting will not occur
+     0.00ns INFO     Found test test_gater.test_gater_simple
+     0.00ns INFO     Running test 1/1: test_gater_simple
+     0.00ns INFO     Starting test: "test_gater_simple"
+                     Description:  Test basic functionality of gater
+  5095.00ns INFO     Test Passed: test_gater_simple
+  5095.00ns INFO     Passed 1 tests (0 skipped)
+  5095.00ns INFO     **************************************************************************************
+                     ** TEST                          PASS/FAIL  SIM TIME(NS)  REAL TIME(S)  RATIO(NS/S) **
+                     **************************************************************************************
+                     ** test_gater.test_gater_simple    PASS         5095.00          0.12     43606.95  **
+                     **************************************************************************************
+                     
+  5095.00ns INFO     *************************************************************************************
+                     **                                 ERRORS : 0                                      **
+                     *************************************************************************************
+                     **                               SIM TIME : 5095.00 NS                             **
+                     **                              REAL TIME : 0.13 S                                 **
+                     **                        SIM / REAL TIME : 40503.13 NS/S                          **
+                     *************************************************************************************
+                     
+  5095.00ns INFO     Shutting down...
+make[1]: Leaving directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+make results.xml
+make[1]: Entering directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+\
+/usr/local/bin/ghdl -i  --std=08  --workdir=sim_build --work=work /home/jwrr/github/fpga-stuff/vhdl-stuff/examples/reg.vhd && \
+/usr/local/bin/ghdl -m  --std=08  --workdir=sim_build -Psim_build --work=work reg
+MODULE=test_reg TESTCASE= TOPLEVEL=reg TOPLEVEL_LANG=vhdl \
+/usr/local/bin/ghdl -r  --std=08 --workdir=sim_build -Psim_build --work=work reg --vpi=/home/jwrr/.local/lib/python3.8/site-packages/cocotb/libs/libcocotbvpi_ghdl.so --vcd=waves.vcd 
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:77   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+     -.--ns INFO     cocotb.gpi                         ../gpi/GpiCommon.cpp:105  in gpi_print_registered_impl       VPI registered
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:240  in _embed_sim_init                 Python interpreter initialized and cocotb loaded!
+     0.00ns INFO     Running on GHDL version 2.0.0-dev (1.0.0.r78.g009f0b95) [Dunoon edition]
+     0.00ns INFO     Running tests with cocotb v1.5.0 from /home/jwrr/.local/lib/python3.8/site-packages/cocotb
+     0.00ns INFO     Seeding Python random module with 1617666962
+     0.00ns WARNING  Pytest not found, assertion rewriting will not occur
+     0.00ns INFO     Found test test_reg.test_reg_simple
+     0.00ns INFO     Running test 1/1: test_reg_simple
+     0.00ns INFO     Starting test: "test_reg_simple"
+                     Description:  Test basic functionality of register
+  1095.00ns INFO     Test Passed: test_reg_simple
+  1095.00ns INFO     Passed 1 tests (0 skipped)
+  1095.00ns INFO     **********************************************************************************
+                     ** TEST                      PASS/FAIL  SIM TIME(NS)  REAL TIME(S)  RATIO(NS/S) **
+                     **********************************************************************************
+                     ** test_reg.test_reg_simple    PASS         1095.00          0.03     36023.65  **
+                     **********************************************************************************
+                     
+  1095.00ns INFO     *************************************************************************************
+                     **                                 ERRORS : 0                                      **
+                     *************************************************************************************
+                     **                               SIM TIME : 1095.00 NS                             **
+                     **                              REAL TIME : 0.04 S                                 **
+                     **                        SIM / REAL TIME : 25860.44 NS/S                          **
+                     *************************************************************************************
+                     
+  1095.00ns INFO     Shutting down...
+make[1]: Leaving directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+make results.xml
+make[1]: Entering directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
+\
+/usr/local/bin/ghdl -i  --std=08  --workdir=sim_build --work=work /home/jwrr/github/fpga-stuff/vhdl-stuff/examples/srff.vhd && \
+/usr/local/bin/ghdl -m  --std=08  --workdir=sim_build -Psim_build --work=work srff
+MODULE=test_srff TESTCASE= TOPLEVEL=srff TOPLEVEL_LANG=vhdl \
+/usr/local/bin/ghdl -r  --std=08 --workdir=sim_build -Psim_build --work=work srff --vpi=/home/jwrr/.local/lib/python3.8/site-packages/cocotb/libs/libcocotbvpi_ghdl.so --vcd=waves.vcd 
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:77   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+     -.--ns INFO     cocotb.gpi                         ../gpi/GpiCommon.cpp:105  in gpi_print_registered_impl       VPI registered
+     -.--ns INFO     cocotb.gpi                         ..mbed/gpi_embed.cpp:240  in _embed_sim_init                 Python interpreter initialized and cocotb loaded!
+     0.00ns INFO     Running on GHDL version 2.0.0-dev (1.0.0.r78.g009f0b95) [Dunoon edition]
+     0.00ns INFO     Running tests with cocotb v1.5.0 from /home/jwrr/.local/lib/python3.8/site-packages/cocotb
+     0.00ns INFO     Seeding Python random module with 1617666963
+     0.00ns WARNING  Pytest not found, assertion rewriting will not occur
+     0.00ns INFO     Found test test_srff.test_srff_simple
+     0.00ns INFO     Running test 1/1: test_srff_simple
+     0.00ns INFO     Starting test: "test_srff_simple"
+                     Description:  Test basic functionality of set/reset flop
+  1095.00ns INFO     Test Passed: test_srff_simple
+  1095.00ns INFO     Passed 1 tests (0 skipped)
+  1095.00ns INFO     ************************************************************************************
+                     ** TEST                        PASS/FAIL  SIM TIME(NS)  REAL TIME(S)  RATIO(NS/S) **
+                     ************************************************************************************
+                     ** test_srff.test_srff_simple    PASS         1095.00          0.04     29392.37  **
+                     ************************************************************************************
+                     
+  1095.00ns INFO     *************************************************************************************
+                     **                                 ERRORS : 0                                      **
+                     *************************************************************************************
+                     **                               SIM TIME : 1095.00 NS                             **
+                     **                              REAL TIME : 0.05 S                                 **
+                     **                        SIM / REAL TIME : 21892.92 NS/S                          **
+                     *************************************************************************************
+                     
+  1095.00ns INFO     Shutting down...
+make[1]: Leaving directory '/home/jwrr/github/fpga-stuff/vhdl-stuff/examples'
