@@ -15,6 +15,7 @@ export COCOTB_REDUCED_LOG_FMT ?= 1
 SIM = ghdl
 EXTRA_ARGS=--std=08
 SIM_ARGS=--vcd=waves.vcd
+#SIM_ARGS=--wave=waves.ghw
 TOPLEVEL_LANG = vhdl
 # export PYTHONPATH := $(PWD)/../model:$(PYTHONPATH)
 VHDL_SOURCES = $(PWD)/$(BLOCK).vhd

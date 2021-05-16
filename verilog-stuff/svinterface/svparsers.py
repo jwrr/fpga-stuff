@@ -139,7 +139,7 @@ class SVParser(mlp.MyLittleParser):
         module_name = self.get_name("module name")
         self.get_keyword("(")
         while self.peek_and_get(")") != ")":
-            self.get_named_port_connection(this_module, all_sigs, all_ifaces)
+            self.get_named_port(this_module, all_sigs, all_ifaces)
             self.peek_and_get(",")
         self.get_keyword(";")
          
@@ -147,16 +147,42 @@ class SVParser(mlp.MyLittleParser):
         parameters = self.get_from_to("@", ")", " ")
         return parameters
         
-    def get_named_port_connection(self, this_module, all_sigs, all_ifaces):
-        dotted_port_name = self.get_name("dotted port name")
-        if dotted_port_name[0] != ".":
+    def get_named_port(self, this_module, all_sigs, all_ifaces):
+        dot_name = self.get_name("dotted port name")
+        if dot_name[0] != ".":
             err_msg = "Only named ports are supported. "
             err_msg += "Named ports must start with '.'. "
-            err_msg += f"'{dotted_port_name}' does not start with '.'"
+            err_msg += f"'{dot_name}' does not start with '.'"
             self.err(err_msg)
         self.get_keyword("(")
-        signal_name = self.get_name("signal name")
+        sig_name = self.get_name("signal name")
+        if self.is_interface(sig_name, all_ifaces):
+            self.expand_if_named_port(dot_name, sig_name, all_ifaces)
         self.get_keyword(")")
+
+    def expand_if_named_port(self, dot_name, if_name):
+        if_sigs = []
+        if "clk_name" in if_dict:
+            if_clk = if_dict["clk_name"]
+            if_sigs.append(f"{dot_name}__{if_clk}({if_name}__{if_clk})")
+        for if_sig_name in if_dict["sig"]:
+            if_sig = if_dict["sig"][if_sig_name]
+            if_name1 = "{dot_name}__{if_sig_name}"
+            if_name2 = "{sig_name}__{if_sig_name}"
+            if_sigs.append(f"{if_name1}({if_name2})")
+        self.update_line_for_if_named_port(if_sigs)
+        
+    def update_line_for_if_named_port(self, if_sigs):
+        if_sig_str = ", ".join(if_sigs)
+        comma = self.peek_choice(",", "")
+        lines = self.lines
+        linenum = self.g_line_i
+        if "__" in lines[linenum]:
+            lines[linenum] = lines[linenum].replace(
+                "//", f"  {if_sig_str}{comma} //", 1
+            )
+        else:
+            lines[linenum] = f"  {if_sig_str}{comma} // {lines[linenum]}"
 
     def is_procedural_block(self, token):
         keywords = "always always_comb always_latch always_ff "
