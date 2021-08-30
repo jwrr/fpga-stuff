@@ -1,0 +1,2 @@
+clear && iverilog -o tb_hbridge.vvp  pwm.v hbridge.v tb_hbridge.v  && vvp tb_hbridge.vvp
+
