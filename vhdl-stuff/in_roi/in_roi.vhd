@@ -38,7 +38,9 @@ port (
   o_fsync   : out std_logic;
   o_lsync   : out std_logic;
   o_dval    : out std_logic;
-  o_data    : out std_logic_vector(DLEN-1 downto 0)
+  o_data    : out std_logic_vector(DLEN-1 downto 0);
+  o_roi0_done   : out std_logic;
+  o_roi1_done   : out std_logic
 );
 end in_roi;
 
@@ -78,11 +80,18 @@ begin
       roi1_c0 <= (others => '0');
       roi1_r1 <= (others => '0');
       roi1_c1 <= (others => '0');
+      fsync <= '0';
+      lsync <= '0';
+      dval  <= '0';
+      data  <= (others => '0');
       o_fsync <= '0';
       o_lsync <= '0';
       o_dval  <= '0';
+      o_data  <= (others => '0');
       o_in_roi0 <= '0';
       o_in_roi1 <= '0';
+      o_roi0_done <= '0';
+      o_roi1_done <= '0';
     elsif rising_edge(i_clk) then
 
       -- allow roi to update on frame boundary
@@ -113,6 +122,7 @@ begin
       fsync <= i_fsync;
       lsync <= i_lsync;
       dval  <= i_dval;
+      data  <= i_data;
 
       -- check if counters are in range
 
@@ -124,6 +134,14 @@ begin
         o_in_roi0 <= '0';
       end if;
 
+      if i_fsync then
+        o_roi0_done <= '0';
+      elsif row = (roi0_r1-1) and col = (roi0_c1-1) then
+        o_roi0_done <= '1';
+      end if; 
+
+      -- ====================================================
+
       if (row >= roi1_r0) and (row < roi1_r1) and
          (col >= roi1_c0) and (col < roi1_c1)
       then
@@ -131,10 +149,17 @@ begin
       else
         o_in_roi1 <= '0';
       end if;
+      
+      if i_fsync then
+        o_roi1_done <= '0';
+      elsif row = (roi1_r1-1) and col = (roi1_c1-1) then
+        o_roi1_done <= '1';
+      end if; 
 
       o_fsync <= fsync;
       o_lsync <= lsync;
       o_dval  <= dval;
+      o_data  <= data;
 
     end if;
   end process;
