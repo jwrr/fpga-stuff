@@ -65,12 +65,6 @@ architecture rtl of in_roi is
 
 begin
 
-  in_roi0 <= '1' when roi0_r0 >= row and row <= roi0_r1 and
-                      roi0_c0 >= col and col <= roi0_c1 else '0';
-
-  in_roi1 <= '1' when roi1_r0 >= row and row <= roi1_r1 and
-                      roi1_c0 >= col and col <= roi1_c1 else '0';
-
   process (i_clk, i_rst)
   begin
     if i_rst then
@@ -78,11 +72,11 @@ begin
       col     <= (others => '0');
       roi0_r0 <= (others => '0');
       roi0_c0 <= (others => '0');
-      roi0_r0 <= (others => '0');
+      roi0_r1 <= (others => '0');
       roi0_c1 <= (others => '0');
       roi1_r0 <= (others => '0');
       roi1_c0 <= (others => '0');
-      roi1_r0 <= (others => '0');
+      roi1_r1 <= (others => '0');
       roi1_c1 <= (others => '0');
       o_fsync <= '0';
       o_lsync <= '0';
@@ -93,14 +87,14 @@ begin
 
       -- allow roi to update on frame boundary
       if i_fsync and i_dval then
-        roi0_r0 <= unsigned(roi0_r0);
-        roi0_c0 <= unsigned(roi0_c0);
-        roi0_r1 <= unsigned(roi0_r0);
-        roi0_c1 <= unsigned(roi0_c1);
-        roi1_r0 <= unsigned(roi1_r0);
-        roi1_c0 <= unsigned(roi1_c0);
-        roi1_r1 <= unsigned(roi1_r1);
-        roi1_c1 <= unsigned(roi1_c1);
+        roi0_r0 <= unsigned(i_roi0_r0);
+        roi0_c0 <= unsigned(i_roi0_c0);
+        roi0_r1 <= unsigned(i_roi0_r1);
+        roi0_c1 <= unsigned(i_roi0_c1);
+        roi1_r0 <= unsigned(i_roi1_r0);
+        roi1_c0 <= unsigned(i_roi1_c0);
+        roi1_r1 <= unsigned(i_roi1_r1);
+        roi1_c1 <= unsigned(i_roi1_c1);
       end if;
 
       -- increment row and column counters
@@ -121,8 +115,22 @@ begin
       dval  <= i_dval;
 
       -- check if counters are in range
-      o_in_roi0 <= in_roi0;
-      o_in_roi1 <= in_roi1;
+
+      if (row >= roi0_r0) and (row < roi0_r1) and
+         (col >= roi0_c0) and (col < roi0_c1)
+      then
+        o_in_roi0 <= '1';
+      else
+        o_in_roi0 <= '0';
+      end if;
+
+      if (row >= roi1_r0) and (row < roi1_r1) and
+         (col >= roi1_c0) and (col < roi1_c1)
+      then
+        o_in_roi1 <= '1';
+      else
+        o_in_roi1 <= '0';
+      end if;
 
       o_fsync <= fsync;
       o_lsync <= lsync;

@@ -49,6 +49,30 @@ architecture sim of tb is
   signal o_lsync     : std_logic := '0';
   signal o_dval      : std_logic := '0';
   signal o_data      : std_logic_vector(DLEN-1 downto 0):= (others => '0');
+  signal data_integer : integer := 0;
+
+--   impure function set_roi(
+--     roi_index : integer;
+--     roi_r0    : integer;
+--     roi_c0    : integer;
+--     roi_r1    : integer;
+--     roi_c1    : integer;
+--     slv :std_logic_vector) 
+--   return std_logic_vector is
+--   begin
+--     if roi_index = 0 then
+--       i_roi0_r0   : std_logic_vector(RLEN-1 downto 0):= (others => '0');
+--       i_roi0_c0   : std_logic_vector(CLEN-1 downto 0):= (others => '0');
+--       i_roi0_r1   : std_logic_vector(RLEN-1 downto 0):= (others => '0');
+--       i_roi0_c1   : std_logic_vector(CLEN-1 downto 0):= (others => '0');
+--     elsif roi_index = 1 then
+--       i_roi1_r0   : std_logic_vector(RLEN-1 downto 0):= (others => '0');
+--       i_roi1_c0   : std_logic_vector(CLEN-1 downto 0):= (others => '0');
+--       i_roi1_r1   : std_logic_vector(RLEN-1 downto 0):= (others => '0');
+--       i_roi1_c1   : std_logic_vector(CLEN-1 downto 0):= (others => '0');
+--     end if;
+--     return std_logic_vector( unsigned(slv) + 1);
+--   end function;
 
 begin
 
@@ -95,6 +119,27 @@ begin
   
 
   main_test: process
+
+    procedure set_roi(
+      roi_index : integer;
+      roi_r0    : integer;
+      roi_c0    : integer;
+      roi_r1    : integer;
+      roi_c1    : integer) is
+    begin
+      if roi_index = 0 then
+        i_roi0_r0   <= std_logic_vector( to_unsigned(roi_r0, i_roi0_r0'length)); -- std_logic_vector(RLEN-1 downto 0)
+        i_roi0_c0   <= std_logic_vector( to_unsigned(roi_c0, i_roi0_c0'length)); -- std_logic_vector(CLEN-1 downto 0)
+        i_roi0_r1   <= std_logic_vector( to_unsigned(roi_r1, i_roi0_r1'length)); -- std_logic_vector(RLEN-1 downto 0)
+        i_roi0_c1   <= std_logic_vector( to_unsigned(roi_c1, i_roi0_c1'length)); -- std_logic_vector(CLEN-1 downto 0)
+      elsif roi_index = 1 then
+        i_roi1_r0   <= std_logic_vector( to_unsigned(roi_r0, i_roi1_r0'length)); -- std_logic_vector(RLEN-1 downto 0)
+        i_roi1_c0   <= std_logic_vector( to_unsigned(roi_c0, i_roi1_c0'length)); -- std_logic_vector(CLEN-1 downto 0)
+        i_roi1_r1   <= std_logic_vector( to_unsigned(roi_r1, i_roi1_r1'length)); -- std_logic_vector(RLEN-1 downto 0)
+        i_roi1_c1   <= std_logic_vector( to_unsigned(roi_c1, i_roi1_c1'length)); -- std_logic_vector(CLEN-1 downto 0)
+      end if;
+    end procedure set_roi;
+
   begin
 
     report("reset dut");
@@ -111,12 +156,33 @@ begin
     for i in 1 to 100 loop
       wait until rising_edge(clk);
     end loop;
+
+    set_roi(0, 200, 300,   203, 303);
+    set_roi(1, 100, 200,   300, 500);
     wait until rising_edge(clk);
     for i in 1 to 20 loop wait until rising_edge(clk); end loop; 
 
-    for i in 1 to 10 loop
-      wait until rising_edge(clk);
-      for j in 1 to 9 loop wait until rising_edge(clk); end loop; 
+    for f in 1 to 3 loop
+      report("Fraame " & integer'image(f)); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
+      for frame_gap in 1 to 200 loop
+        wait until rising_edge(clk);
+      end loop;
+      i_fsync <= '1';
+      for r in 0 to 479 loop
+        i_lsync <= '1';
+        for line_gap in 1 to 50 loop
+          wait until rising_edge(clk);
+        end loop;
+        for c in 0 to 639 loop
+          i_dval <= '1';
+          i_data <= std_logic_vector( to_unsigned(data_integer, i_data'length));
+          data_integer <= (data_integer + 1) mod 2**16;
+          wait until rising_edge(clk);
+          i_fsync <= '0';
+          i_lsync <= '0';
+          i_dval  <= '0';
+        end loop; 
+      end loop;
     end loop;
 
     report("Test done"); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
