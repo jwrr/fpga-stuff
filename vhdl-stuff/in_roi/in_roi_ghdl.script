@@ -1,4 +1,0 @@
-ghdl -a --std=08 in_roi.vhd in_roi_tb.vhd
-ghdl -e --std=08 tb
-ghdl -r --std=08 tb --vcd=waves.vcd
-echo To view waves: gtkwave waves.vcd
