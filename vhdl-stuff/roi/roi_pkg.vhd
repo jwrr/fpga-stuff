@@ -18,23 +18,30 @@ package roi_pkg is
   constant SLEN : integer := 32; -- Num bits in Sum
 
   type fromx_roi_record is record
-    roi0_r0 : std_logic_vector(RLEN-1 downto 0);
-    roi0_c0 : std_logic_vector(CLEN-1 downto 0);
-    roi0_r1 : std_logic_vector(RLEN-1 downto 0);
-    roi0_c1 : std_logic_vector(CLEN-1 downto 0);
-    roi1_r0 : std_logic_vector(RLEN-1 downto 0);
-    roi1_c0 : std_logic_vector(CLEN-1 downto 0);
-    roi1_r1 : std_logic_vector(RLEN-1 downto 0);
-    roi1_c1 : std_logic_vector(CLEN-1 downto 0);
+    roi_center_r0 : std_logic_vector(RLEN-1 downto 0);
+    roi_center_c0 : std_logic_vector(CLEN-1 downto 0);
+    roi_center_r1 : std_logic_vector(RLEN-1 downto 0);
+    roi_center_c1 : std_logic_vector(CLEN-1 downto 0);
+    roi_minmax_r0 : std_logic_vector(RLEN-1 downto 0);
+    roi_minmax_c0 : std_logic_vector(CLEN-1 downto 0);
+    roi_minmax_r1 : std_logic_vector(RLEN-1 downto 0);
+    roi_minmax_c1 : std_logic_vector(CLEN-1 downto 0);
+    roi_select_r0 : std_logic_vector(RLEN-1 downto 0);
+    roi_select_c0 : std_logic_vector(CLEN-1 downto 0);
+    roi_select_r1 : std_logic_vector(RLEN-1 downto 0);
+    roi_select_c1 : std_logic_vector(CLEN-1 downto 0);
   end record;
 
   type roi_tox_record is record
-    roi0_max : std_logic_vector(DLEN-1 downto 0);
-    roi0_min : std_logic_vector(DLEN-1 downto 0);
-    roi0_sum : std_logic_vector(SLEN-1 downto 0);
-    roi1_max : std_logic_vector(DLEN-1 downto 0);
-    roi1_min : std_logic_vector(DLEN-1 downto 0);
-    roi1_sum : std_logic_vector(SLEN-1 downto 0);
+    roi_center_max : std_logic_vector(DLEN-1 downto 0);
+    roi_center_min : std_logic_vector(DLEN-1 downto 0);
+    roi_center_sum : std_logic_vector(SLEN-1 downto 0);
+    roi_minmax_max : std_logic_vector(DLEN-1 downto 0);
+    roi_minmax_min : std_logic_vector(DLEN-1 downto 0);
+    roi_minmax_sum : std_logic_vector(SLEN-1 downto 0);
+    roi_select_max : std_logic_vector(DLEN-1 downto 0);
+    roi_select_min : std_logic_vector(DLEN-1 downto 0);
+    roi_select_sum : std_logic_vector(SLEN-1 downto 0);
   end record;
 end package;
 
