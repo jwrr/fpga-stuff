@@ -12,6 +12,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 library work;
+use work.roi_pkg.all;
 
 entity roi_is_in is
 generic (
@@ -20,6 +21,7 @@ generic (
   DLEN : integer := 16
 );
 port (
+  fromx_roi_rec : in  fromx_roi_record;
   i_clk     : in  std_logic;
   i_rst     : in  std_logic;
   i_fsync   : in  std_logic;
@@ -27,14 +29,6 @@ port (
   i_dval    : in  std_logic;
   i_data0   : in  std_logic_vector(DLEN-1 downto 0);
   i_data1   : in  std_logic_vector(DLEN-1 downto 0);
-  i_roi0_r0 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi0_c0 : in  std_logic_vector(CLEN-1 downto 0);
-  i_roi0_r1 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi0_c1 : in  std_logic_vector(CLEN-1 downto 0);
-  i_roi1_r0 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi1_c0 : in  std_logic_vector(CLEN-1 downto 0);
-  i_roi1_r1 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi1_c1 : in  std_logic_vector(CLEN-1 downto 0);
   o_roi0_is_in : out std_logic;
   o_roi1_is_in : out std_logic;
   o_fsync   : out std_logic;
@@ -65,10 +59,6 @@ architecture rtl of roi_is_in is
   signal dval    : std_logic;
   signal data0   : std_logic_vector(DLEN-1 downto 0);
   signal data1   : std_logic_vector(DLEN-1 downto 0);
-
-  signal roi_is_in0 : std_logic;
-  signal roi_is_in1 : std_logic;
-
 begin
 
   process (i_clk, i_rst)
@@ -102,14 +92,14 @@ begin
 
       -- allow roi to update on frame boundary
       if i_fsync and i_dval then
-        roi0_r0 <= unsigned(i_roi0_r0);
-        roi0_c0 <= unsigned(i_roi0_c0);
-        roi0_r1 <= unsigned(i_roi0_r1);
-        roi0_c1 <= unsigned(i_roi0_c1);
-        roi1_r0 <= unsigned(i_roi1_r0);
-        roi1_c0 <= unsigned(i_roi1_c0);
-        roi1_r1 <= unsigned(i_roi1_r1);
-        roi1_c1 <= unsigned(i_roi1_c1);
+        roi0_r0 <= unsigned(fromx_roi_rec.roi0_r0);
+        roi0_c0 <= unsigned(fromx_roi_rec.roi0_c0);
+        roi0_r1 <= unsigned(fromx_roi_rec.roi0_r1);
+        roi0_c1 <= unsigned(fromx_roi_rec.roi0_c1);
+        roi1_r0 <= unsigned(fromx_roi_rec.roi1_r0);
+        roi1_c0 <= unsigned(fromx_roi_rec.roi1_c0);
+        roi1_r1 <= unsigned(fromx_roi_rec.roi1_r1);
+        roi1_c1 <= unsigned(fromx_roi_rec.roi1_c1);
       end if;
 
       -- increment row and column counters

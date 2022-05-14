@@ -9,56 +9,51 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 library work;
+use work.roi_pkg.all;
 -- use work.tb_pkg.all;
 
 entity tb is
 end entity tb;
 
 architecture sim of tb is
-  constant CLK_PERIOD : time := 10 ns;
-  constant DWID       : integer := 16;
+  constant CLK_PERIOD   : time := 10 ns;
+  constant DWID         : integer := 16;
 
-  constant CLEN       : integer := 10;
-  constant RLEN       : integer := 9;
-  constant DLEN       : integer := 16;
-  constant SLEN       : integer := 32;
+  constant CLEN         : integer := 10;
+  constant RLEN         : integer := 9;
+  constant DLEN         : integer := 16;
+  constant SLEN         : integer := 32;
 
-  signal test_done    : std_logic := '0';
-  
-  signal clk          : std_logic := '0';
-  signal rst          : std_logic := '0';
-  
-  signal i_clk        : std_logic := '0';
-  signal i_rst        : std_logic := '0';
-  signal i_fsync      : std_logic := '0';
-  signal i_lsync      : std_logic := '0';
-  signal i_dval       : std_logic := '0';
-  signal i_data0      : std_logic_vector(DLEN-1 downto 0):= (others => '0');
-  signal i_data1      : std_logic_vector(DLEN-1 downto 0):= (others => '0');
-  signal i_roi0_r0    : std_logic_vector(RLEN-1 downto 0):= (others => '0');
-  signal i_roi0_c0    : std_logic_vector(CLEN-1 downto 0):= (others => '0');
-  signal i_roi0_r1    : std_logic_vector(RLEN-1 downto 0):= (others => '0');
-  signal i_roi0_c1    : std_logic_vector(CLEN-1 downto 0):= (others => '0');
-  signal i_roi1_r0    : std_logic_vector(RLEN-1 downto 0):= (others => '0');
-  signal i_roi1_c0    : std_logic_vector(CLEN-1 downto 0):= (others => '0');
-  signal i_roi1_r1    : std_logic_vector(RLEN-1 downto 0):= (others => '0');
-  signal i_roi1_c1    : std_logic_vector(CLEN-1 downto 0):= (others => '0');
+  signal test_done      : std_logic := '0';
 
-  signal o_roi0_max   : std_logic_vector(DLEN-1 downto 0);
-  signal o_roi0_min   : std_logic_vector(DLEN-1 downto 0);
-  signal o_roi0_sum   : std_logic_vector(SLEN-1 downto 0);
-  signal o_roi1_max   : std_logic_vector(DLEN-1 downto 0);
-  signal o_roi1_min   : std_logic_vector(DLEN-1 downto 0);
-  signal o_roi1_sum   : std_logic_vector(SLEN-1 downto 0);
+  signal clk            : std_logic := '0';
+  signal rst            : std_logic := '0';
 
-  signal o_fsync      : std_logic;
-  signal o_lsync      : std_logic;
-  signal o_dval       : std_logic;
-  signal o_roi0_done  : std_logic;
-  signal o_roi1_done  : std_logic;
-  signal o_data0      : std_logic_vector(DLEN-1 downto 0);
-  signal o_data1      : std_logic_vector(DLEN-1 downto 0);
-  signal data_integer : integer := 0;
+  signal i_clk          : std_logic := '0';
+  signal i_rst          : std_logic := '0';
+  signal i_fsync        : std_logic := '0';
+  signal i_lsync        : std_logic := '0';
+  signal i_dval         : std_logic := '0';
+  signal i_data0        : std_logic_vector(DLEN-1 downto 0):= (others => '0');
+  signal i_data1        : std_logic_vector(DLEN-1 downto 0):= (others => '0');
+
+  signal o_roi0_max     : std_logic_vector(DLEN-1 downto 0);
+  signal o_roi0_min     : std_logic_vector(DLEN-1 downto 0);
+  signal o_roi0_sum     : std_logic_vector(SLEN-1 downto 0);
+  signal o_roi1_max     : std_logic_vector(DLEN-1 downto 0);
+  signal o_roi1_min     : std_logic_vector(DLEN-1 downto 0);
+  signal o_roi1_sum     : std_logic_vector(SLEN-1 downto 0);
+
+  signal o_fsync        : std_logic;
+  signal o_lsync        : std_logic;
+  signal o_dval         : std_logic;
+  signal o_roi0_done    : std_logic;
+  signal o_roi1_done    : std_logic;
+  signal o_data0        : std_logic_vector(DLEN-1 downto 0);
+  signal o_data1        : std_logic_vector(DLEN-1 downto 0);
+  signal data_integer   : integer := 0;
+  signal fromx_roi_rec  : fromx_roi_record;
+  signal roi_tox_rec    : roi_tox_record;
 
 begin
 
@@ -69,6 +64,8 @@ begin
     DLEN => DLEN
   )
   port map (
+    fromx_roi_rec  => fromx_roi_rec,
+    roi_tox_rec    => roi_tox_rec,
     i_clk          => clk,           --  in  std_logic;
     i_rst          => rst,           --  in  std_logic;
     i_fsync        => i_fsync,       --  in  std_logic;
@@ -76,23 +73,6 @@ begin
     i_dval         => i_dval,        --  in  std_logic;
     i_data0        => i_data0,       --  in  std_logic_vector(DLEN-1 downto 0);
     i_data1        => i_data1,       --  in  std_logic_vector(DLEN-1 downto 0);
-    i_roi0_r0      => i_roi0_r0,     --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi0_c0      => i_roi0_c0,     --  in  std_logic_vector(CLEN-1 downto 0);
-    i_roi0_r1      => i_roi0_r1,     --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi0_c1      => i_roi0_c1,     --  in  std_logic_vector(CLEN-1 downto 0);
-    i_roi1_r0      => i_roi1_r0,     --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi1_c0      => i_roi1_c0,     --  in  std_logic_vector(CLEN-1 downto 0);
-    i_roi1_r1      => i_roi1_r1,     --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi1_c1      => i_roi1_c1,     --  in  std_logic_vector(CLEN-1 downto 0);
-
-    o_roi0_max     => o_roi0_max,      --  out std_logic_vector(DLEN-1 downto 0);
-    o_roi0_min     => o_roi0_min,      --  out std_logic_vector(DLEN-1 downto 0);
-    o_roi0_sum     => o_roi0_sum,      --  out std_logic_vector(SLEN-1 downto 0);
-    o_roi1_max     => o_roi1_max,      --  out std_logic_vector(DLEN-1 downto 0);
-    o_roi1_min     => o_roi1_min,      --  out std_logic_vector(DLEN-1 downto 0);
-    o_roi1_sum     => o_roi1_sum,      --  out std_logic_vector(SLEN-1 downto 0);
-
-
     o_fsync        => o_fsync,       --  out std_logic;
     o_lsync        => o_lsync,       --  out std_logic;
     o_dval         => o_dval,        --  out std_logic;
@@ -110,7 +90,7 @@ begin
     end loop;
     wait;  -- Simulation stops stop after clock stops
   end process;
-  
+
 
   main_test: process
 
@@ -122,15 +102,15 @@ begin
       roi_c1    : integer) is
     begin
       if roi_index = 0 then
-        i_roi0_r0   <= std_logic_vector( to_unsigned(roi_r0, i_roi0_r0'length)); -- std_logic_vector(RLEN-1 downto 0)
-        i_roi0_c0   <= std_logic_vector( to_unsigned(roi_c0, i_roi0_c0'length)); -- std_logic_vector(CLEN-1 downto 0)
-        i_roi0_r1   <= std_logic_vector( to_unsigned(roi_r1, i_roi0_r1'length)); -- std_logic_vector(RLEN-1 downto 0)
-        i_roi0_c1   <= std_logic_vector( to_unsigned(roi_c1, i_roi0_c1'length)); -- std_logic_vector(CLEN-1 downto 0)
+        fromx_roi_rec.roi0_r0   <= std_logic_vector( to_unsigned(roi_r0, fromx_roi_rec.roi0_r0'length)); -- std_logic_vector(RLEN-1 downto 0)
+        fromx_roi_rec.roi0_c0   <= std_logic_vector( to_unsigned(roi_c0, fromx_roi_rec.roi0_c0'length)); -- std_logic_vector(CLEN-1 downto 0)
+        fromx_roi_rec.roi0_r1   <= std_logic_vector( to_unsigned(roi_r1, fromx_roi_rec.roi0_r1'length)); -- std_logic_vector(RLEN-1 downto 0)
+        fromx_roi_rec.roi0_c1   <= std_logic_vector( to_unsigned(roi_c1, fromx_roi_rec.roi0_c1'length)); -- std_logic_vector(CLEN-1 downto 0)
       elsif roi_index = 1 then
-        i_roi1_r0   <= std_logic_vector( to_unsigned(roi_r0, i_roi1_r0'length)); -- std_logic_vector(RLEN-1 downto 0)
-        i_roi1_c0   <= std_logic_vector( to_unsigned(roi_c0, i_roi1_c0'length)); -- std_logic_vector(CLEN-1 downto 0)
-        i_roi1_r1   <= std_logic_vector( to_unsigned(roi_r1, i_roi1_r1'length)); -- std_logic_vector(RLEN-1 downto 0)
-        i_roi1_c1   <= std_logic_vector( to_unsigned(roi_c1, i_roi1_c1'length)); -- std_logic_vector(CLEN-1 downto 0)
+        fromx_roi_rec.roi1_r0   <= std_logic_vector( to_unsigned(roi_r0, fromx_roi_rec.roi1_r0'length)); -- std_logic_vector(RLEN-1 downto 0)
+        fromx_roi_rec.roi1_c0   <= std_logic_vector( to_unsigned(roi_c0, fromx_roi_rec.roi1_c0'length)); -- std_logic_vector(CLEN-1 downto 0)
+        fromx_roi_rec.roi1_r1   <= std_logic_vector( to_unsigned(roi_r1, fromx_roi_rec.roi1_r1'length)); -- std_logic_vector(RLEN-1 downto 0)
+        fromx_roi_rec.roi1_c1   <= std_logic_vector( to_unsigned(roi_c1, fromx_roi_rec.roi1_c1'length)); -- std_logic_vector(CLEN-1 downto 0)
       end if;
     end procedure set_roi;
 
@@ -138,15 +118,15 @@ begin
 
     report("reset dut");
     rst <= '0';
-    for i in 1 to 10 loop wait until rising_edge(clk); end loop; 
+    for i in 1 to 10 loop wait until rising_edge(clk); end loop;
     rst <= '1';
-    for i in 1 to 10 loop wait until rising_edge(clk); end loop; 
+    for i in 1 to 10 loop wait until rising_edge(clk); end loop;
     report("After reset");
     rst <= '0';
-    for i in 1 to 10 loop wait until rising_edge(clk); end loop; 
+    for i in 1 to 10 loop wait until rising_edge(clk); end loop;
 
     report("Start of test");
-    
+
     for i in 1 to 100 loop
       wait until rising_edge(clk);
     end loop;
@@ -154,7 +134,7 @@ begin
     set_roi(0, 200, 300,   203, 303);
     set_roi(1, 100, 200,   300, 500);
     wait until rising_edge(clk);
-    for i in 1 to 20 loop wait until rising_edge(clk); end loop; 
+    for i in 1 to 20 loop wait until rising_edge(clk); end loop;
 
     for f in 1 to 3 loop
       report("Frame " & integer'image(f)); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
@@ -176,12 +156,12 @@ begin
           i_fsync <= '0';
           i_lsync <= '0';
           i_dval  <= '0';
-        end loop; 
+        end loop;
       end loop;
     end loop;
 
     report("Test done"); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
-    for i in 1 to 10 loop wait until rising_edge(clk); end loop; 
+    for i in 1 to 10 loop wait until rising_edge(clk); end loop;
     test_done <= '1';
     wait;
   end process main_test;

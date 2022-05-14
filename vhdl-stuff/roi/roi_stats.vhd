@@ -11,6 +11,8 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 library work;
+use work.roi_pkg.all;
+
 
 entity roi_stats is
 generic (
@@ -20,34 +22,21 @@ generic (
   SLEN : integer := 32
 );
 port (
-  i_clk     : in  std_logic;
-  i_rst     : in  std_logic;
-  i_fsync   : in  std_logic;
-  i_lsync   : in  std_logic;
-  i_dval    : in  std_logic;
-  i_data0   : in  std_logic_vector(DLEN-1 downto 0);
-  i_data1   : in  std_logic_vector(DLEN-1 downto 0);
-  i_roi0_r0 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi0_c0 : in  std_logic_vector(CLEN-1 downto 0);
-  i_roi0_r1 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi0_c1 : in  std_logic_vector(CLEN-1 downto 0);
-  i_roi1_r0 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi1_c0 : in  std_logic_vector(CLEN-1 downto 0);
-  i_roi1_r1 : in  std_logic_vector(RLEN-1 downto 0);
-  i_roi1_c1 : in  std_logic_vector(CLEN-1 downto 0);
+  fromx_roi_rec : in  fromx_roi_record;
+  roi_tox_rec   : out roi_tox_record;
+  i_clk         : in  std_logic;
+  i_rst         : in  std_logic;
+  i_fsync       : in  std_logic;
+  i_lsync       : in  std_logic;
+  i_dval        : in  std_logic;
+  i_data0       : in  std_logic_vector(DLEN-1 downto 0);
+  i_data1       : in  std_logic_vector(DLEN-1 downto 0);
 
-  o_roi0_max : out std_logic_vector(DLEN-1 downto 0);
-  o_roi0_min : out std_logic_vector(DLEN-1 downto 0);
-  o_roi0_sum : out std_logic_vector(SLEN-1 downto 0);
-  o_roi1_max : out std_logic_vector(DLEN-1 downto 0);
-  o_roi1_min : out std_logic_vector(DLEN-1 downto 0);
-  o_roi1_sum : out std_logic_vector(SLEN-1 downto 0);
-
-  o_fsync    : out std_logic;
-  o_lsync    : out std_logic;
-  o_dval     : out std_logic;
-  o_data0    : out std_logic_vector(DLEN-1 downto 0);
-  o_data1    : out std_logic_vector(DLEN-1 downto 0)
+  o_fsync       : out std_logic;
+  o_lsync       : out std_logic;
+  o_dval        : out std_logic;
+  o_data0       : out std_logic_vector(DLEN-1 downto 0);
+  o_data1       : out std_logic_vector(DLEN-1 downto 0)
 );
 end roi_stats;
 
@@ -67,52 +56,44 @@ begin
     DLEN => DLEN
   )
   port map (
-    i_clk          => i_clk,      --  in  std_logic;
-    i_rst          => i_rst,      --  in  std_logic;
-    i_fsync        => i_fsync,    --  in  std_logic;
-    i_lsync        => i_lsync,    --  in  std_logic;
-    i_dval         => i_dval,     --  in  std_logic;
-    i_data0        => i_data0,    --  in  std_logic_vector(DLEN-1 downto 0);
-    i_data1        => i_data1,    --  in  std_logic_vector(DLEN-1 downto 0);
-    i_roi0_r0      => i_roi0_r0,  --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi0_c0      => i_roi0_c0,  --  in  std_logic_vector(CLEN-1 downto 0);
-    i_roi0_r1      => i_roi0_r1,  --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi0_c1      => i_roi0_c1,  --  in  std_logic_vector(CLEN-1 downto 0);
-    i_roi1_r0      => i_roi1_r0,  --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi1_c0      => i_roi1_c0,  --  in  std_logic_vector(CLEN-1 downto 0);
-    i_roi1_r1      => i_roi1_r1,  --  in  std_logic_vector(RLEN-1 downto 0);
-    i_roi1_c1      => i_roi1_c1,  --  in  std_logic_vector(CLEN-1 downto 0);
-    o_roi0_is_in   => roi0_is_in, --  out std_logic;
-    o_roi1_is_in   => roi1_is_in, --  out std_logic;
-    o_fsync        => o_fsync,    --  out std_logic;
-    o_lsync        => o_lsync,    --  out std_logic;
-    o_dval         => o_dval,     --  out std_logic;
-    o_roi0_done    => open,       --  out std_logic;
-    o_roi1_done    => open,       --  out std_logic;
-    o_data0        => o_data0,    --  out std_logic_vector(DLEN-1 downto 0);
-    o_data1        => o_data1     --  out std_logic_vector(DLEN-1 downto 0);
+    fromx_roi_rec => fromx_roi_rec,
+    i_clk         => i_clk,      --  in  std_logic;
+    i_rst         => i_rst,      --  in  std_logic;
+    i_fsync       => i_fsync,    --  in  std_logic;
+    i_lsync       => i_lsync,    --  in  std_logic;
+    i_dval        => i_dval,     --  in  std_logic;
+    i_data0       => i_data0,    --  in  std_logic_vector(DLEN-1 downto 0);
+    i_data1       => i_data1,    --  in  std_logic_vector(DLEN-1 downto 0);
+    o_roi0_is_in  => roi0_is_in, --  out std_logic;
+    o_roi1_is_in  => roi1_is_in, --  out std_logic;
+    o_fsync       => o_fsync,    --  out std_logic;
+    o_lsync       => o_lsync,    --  out std_logic;
+    o_dval        => o_dval,     --  out std_logic;
+    o_roi0_done   => roi0_done,  --  out std_logic;
+    o_roi1_done   => roi1_done,  --  out std_logic;
+    o_data0       => o_data0,    --  out std_logic_vector(DLEN-1 downto 0);
+    o_data1       => o_data1     --  out std_logic_vector(DLEN-1 downto 0);
   );
-
 
   process (i_clk, i_rst)
   begin
     if i_rst then
-      o_roi0_max <= (others => '0');
-      o_roi0_min <= (others => '0');
-      o_roi0_sum <= (others => '0');
+      roi_tox_rec.roi0_max <= (others => '0');
+      roi_tox_rec.roi0_min <= (others => '0');
+      roi_tox_rec.roi0_sum <= (others => '0');
     elsif rising_edge(i_clk) then
       if i_fsync then
-        o_roi0_max <= (others => '0');
-        o_roi0_min <= (others => '1');
-        o_roi0_sum <= (others => '0');
+        roi_tox_rec.roi0_max <= (others => '0');
+        roi_tox_rec.roi0_min <= (others => '1');
+        roi_tox_rec.roi0_sum <= (others => '0');
       elsif roi0_is_in then
-        if unsigned(o_data0) > unsigned(o_roi0_max) then
-          o_roi0_max <= o_data0;
+        if unsigned(o_data0) > unsigned(roi_tox_rec.roi0_max) then
+          roi_tox_rec.roi0_max <= o_data0;
         end if;
-        if unsigned(o_data0) < unsigned(o_roi0_min) then
-          o_roi0_min <= o_data0;
+        if unsigned(o_data0) < unsigned(roi_tox_rec.roi0_min) then
+          roi_tox_rec.roi0_min <= o_data0;
         end if;
-        o_roi0_sum <= std_logic_vector(to_unsigned(to_integer(unsigned(o_roi0_sum)) + to_integer(unsigned(o_data0)), o_roi0_sum'length));
+        roi_tox_rec.roi0_sum <= std_logic_vector(to_unsigned(to_integer(unsigned(roi_tox_rec.roi0_sum)) + to_integer(unsigned(o_data0)), roi_tox_rec.roi0_sum'length));
       end if;
     end if;
   end process;
@@ -121,22 +102,22 @@ begin
   process (i_clk, i_rst)
   begin
     if i_rst then
-      o_roi1_max <= (others => '0');
-      o_roi1_min <= (others => '0');
-      o_roi1_sum <= (others => '0');
+      roi_tox_rec.roi1_max <= (others => '0');
+      roi_tox_rec.roi1_min <= (others => '0');
+      roi_tox_rec.roi1_sum <= (others => '0');
     elsif rising_edge(i_clk) then
       if i_fsync then
-        o_roi1_max <= (others => '0');
-        o_roi1_min <= (others => '1');
-        o_roi1_sum <= (others => '0');
+        roi_tox_rec.roi1_max <= (others => '0');
+        roi_tox_rec.roi1_min <= (others => '1');
+        roi_tox_rec.roi1_sum <= (others => '0');
       elsif roi1_is_in then
-        if unsigned(o_data0) > unsigned(o_roi1_max) then
-          o_roi1_max <= o_data0;
+        if unsigned(o_data0) > unsigned(roi_tox_rec.roi1_max) then
+          roi_tox_rec.roi1_max <= o_data0;
         end if;
-        if unsigned(o_data0) < unsigned(o_roi1_min) then
-          o_roi1_min <= o_data0;
+        if unsigned(o_data0) < unsigned(roi_tox_rec.roi1_min) then
+          roi_tox_rec.roi1_min <= o_data0;
         end if;
-        o_roi1_sum <= std_logic_vector(to_unsigned(to_integer(unsigned(o_roi1_sum)) + to_integer(unsigned(o_data0)), o_roi1_sum'length));
+        roi_tox_rec.roi1_sum <= std_logic_vector(to_unsigned(to_integer(unsigned(roi_tox_rec.roi1_sum)) + to_integer(unsigned(o_data0)), roi_tox_rec.roi1_sum'length));
       end if;
     end if;
   end process;
