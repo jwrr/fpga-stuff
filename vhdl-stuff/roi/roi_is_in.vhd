@@ -25,7 +25,8 @@ port (
   i_fsync   : in  std_logic;
   i_lsync   : in  std_logic;
   i_dval    : in  std_logic;
-  i_data    : in  std_logic_vector(DLEN-1 downto 0);
+  i_data0   : in  std_logic_vector(DLEN-1 downto 0);
+  i_data1   : in  std_logic_vector(DLEN-1 downto 0);
   i_roi0_r0 : in  std_logic_vector(RLEN-1 downto 0);
   i_roi0_c0 : in  std_logic_vector(CLEN-1 downto 0);
   i_roi0_r1 : in  std_logic_vector(RLEN-1 downto 0);
@@ -39,7 +40,8 @@ port (
   o_fsync   : out std_logic;
   o_lsync   : out std_logic;
   o_dval    : out std_logic;
-  o_data    : out std_logic_vector(DLEN-1 downto 0);
+  o_data0   : out std_logic_vector(DLEN-1 downto 0);
+  o_data1   : out std_logic_vector(DLEN-1 downto 0);
   o_roi0_done   : out std_logic;
   o_roi1_done   : out std_logic
 );
@@ -61,7 +63,8 @@ architecture rtl of roi_is_in is
   signal fsync   : std_logic;
   signal lsync   : std_logic;
   signal dval    : std_logic;
-  signal data    : std_logic_vector(DLEN-1 downto 0);
+  signal data0   : std_logic_vector(DLEN-1 downto 0);
+  signal data1   : std_logic_vector(DLEN-1 downto 0);
 
   signal roi_is_in0 : std_logic;
   signal roi_is_in1 : std_logic;
@@ -71,24 +74,26 @@ begin
   process (i_clk, i_rst)
   begin
     if i_rst then
-      row     <= (others => '0');
-      col     <= (others => '0');
-      roi0_r0 <= (others => '0');
-      roi0_c0 <= (others => '0');
-      roi0_r1 <= (others => '0');
-      roi0_c1 <= (others => '0');
-      roi1_r0 <= (others => '0');
-      roi1_c0 <= (others => '0');
-      roi1_r1 <= (others => '0');
-      roi1_c1 <= (others => '0');
-      fsync <= '0';
-      lsync <= '0';
-      dval  <= '0';
-      data  <= (others => '0');
-      o_fsync <= '0';
-      o_lsync <= '0';
-      o_dval  <= '0';
-      o_data  <= (others => '0');
+      row      <= (others => '0');
+      col      <= (others => '0');
+      roi0_r0  <= (others => '0');
+      roi0_c0  <= (others => '0');
+      roi0_r1  <= (others => '0');
+      roi0_c1  <= (others => '0');
+      roi1_r0  <= (others => '0');
+      roi1_c0  <= (others => '0');
+      roi1_r1  <= (others => '0');
+      roi1_c1  <= (others => '0');
+      fsync    <= '0';
+      lsync    <= '0';
+      dval     <= '0';
+      data0    <= (others => '0');
+      data1    <= (others => '0');
+      o_fsync  <= '0';
+      o_lsync  <= '0';
+      o_dval   <= '0';
+      o_data0  <= (others => '0');
+      o_data1  <= (others => '0');
       o_roi0_is_in <= '0';
       o_roi1_is_in <= '0';
       o_roi0_done <= '0';
@@ -120,10 +125,11 @@ begin
         col <= col + 1;
       end if;
 
-      fsync <= i_fsync;
-      lsync <= i_lsync;
-      dval  <= i_dval;
-      data  <= i_data;
+      fsync  <= i_fsync;
+      lsync  <= i_lsync;
+      dval   <= i_dval;
+      data0  <= i_data0;
+      data1  <= i_data1;
 
       -- check if counters are in range
 
@@ -160,7 +166,8 @@ begin
       o_fsync <= fsync;
       o_lsync <= lsync;
       o_dval  <= dval;
-      o_data  <= data;
+      o_data0  <= data0;
+      o_data1  <= data1;
 
     end if;
   end process;

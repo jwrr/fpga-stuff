@@ -1,0 +1,4 @@
+ghdl -a --std=08 roi_is_in.vhd roi_select.vhd roi_select_tb.vhd
+ghdl -e --std=08 tb
+ghdl -r --std=08 tb --vcd=waves.vcd
+echo To view waves: gtkwave waves.vcd

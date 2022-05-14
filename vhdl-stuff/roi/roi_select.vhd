@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- Block: roi_stats
+-- Block: roi_select
 -- Description:
 -- This block checks if the current pixel is in the region of interest. Two
 -- ROIs are supported
@@ -12,7 +12,7 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 library work;
 
-entity roi_stats is
+entity roi_select is
 generic (
   CLEN : integer := 9;
   RLEN : integer := 8;
@@ -36,27 +36,22 @@ port (
   i_roi1_r1 : in  std_logic_vector(RLEN-1 downto 0);
   i_roi1_c1 : in  std_logic_vector(CLEN-1 downto 0);
 
-  o_roi0_max : out std_logic_vector(DLEN-1 downto 0);
-  o_roi0_min : out std_logic_vector(DLEN-1 downto 0);
-  o_roi0_sum : out std_logic_vector(SLEN-1 downto 0);
-  o_roi1_max : out std_logic_vector(DLEN-1 downto 0);
-  o_roi1_min : out std_logic_vector(DLEN-1 downto 0);
-  o_roi1_sum : out std_logic_vector(SLEN-1 downto 0);
-
   o_fsync    : out std_logic;
   o_lsync    : out std_logic;
   o_dval     : out std_logic;
   o_data0    : out std_logic_vector(DLEN-1 downto 0);
   o_data1    : out std_logic_vector(DLEN-1 downto 0)
 );
-end roi_stats;
+end roi_select;
 
-architecture rtl of roi_stats is
+architecture rtl of roi_select is
 
   signal roi0_done   : std_logic;
   signal roi1_done   : std_logic;
   signal roi0_is_in  : std_logic;
   signal roi1_is_in  : std_logic;
+  signal data0       : std_logic_vector(DLEN-1 downto 0);
+  signal data1       : std_logic_vector(DLEN-1 downto 0);
 
 begin
 
@@ -87,59 +82,14 @@ begin
     o_fsync        => o_fsync,    --  out std_logic;
     o_lsync        => o_lsync,    --  out std_logic;
     o_dval         => o_dval,     --  out std_logic;
-    o_roi0_done    => open,       --  out std_logic;
-    o_roi1_done    => open,       --  out std_logic;
-    o_data0        => o_data0,    --  out std_logic_vector(DLEN-1 downto 0);
-    o_data1        => o_data1     --  out std_logic_vector(DLEN-1 downto 0);
+    o_roi0_done    => roi0_done,  --  out std_logic;
+    o_roi1_done    => roi1_done,  --  out std_logic;
+    o_data0        => data0,      --  out std_logic_vector(DLEN-1 downto 0);
+    o_data1        => data1       --  out std_logic_vector(DLEN-1 downto 0);
   );
 
-
-  process (i_clk, i_rst)
-  begin
-    if i_rst then
-      o_roi0_max <= (others => '0');
-      o_roi0_min <= (others => '0');
-      o_roi0_sum <= (others => '0');
-    elsif rising_edge(i_clk) then
-      if i_fsync then
-        o_roi0_max <= (others => '0');
-        o_roi0_min <= (others => '1');
-        o_roi0_sum <= (others => '0');
-      elsif roi0_is_in then
-        if unsigned(o_data0) > unsigned(o_roi0_max) then
-          o_roi0_max <= o_data0;
-        end if;
-        if unsigned(o_data0) < unsigned(o_roi0_min) then
-          o_roi0_min <= o_data0;
-        end if;
-        o_roi0_sum <= std_logic_vector(to_unsigned(to_integer(unsigned(o_roi0_sum)) + to_integer(unsigned(o_data0)), o_roi0_sum'length));
-      end if;
-    end if;
-  end process;
-
-
-  process (i_clk, i_rst)
-  begin
-    if i_rst then
-      o_roi1_max <= (others => '0');
-      o_roi1_min <= (others => '0');
-      o_roi1_sum <= (others => '0');
-    elsif rising_edge(i_clk) then
-      if i_fsync then
-        o_roi1_max <= (others => '0');
-        o_roi1_min <= (others => '1');
-        o_roi1_sum <= (others => '0');
-      elsif roi1_is_in then
-        if unsigned(o_data0) > unsigned(o_roi1_max) then
-          o_roi1_max <= o_data0;
-        end if;
-        if unsigned(o_data0) < unsigned(o_roi1_min) then
-          o_roi1_min <= o_data0;
-        end if;
-        o_roi1_sum <= std_logic_vector(to_unsigned(to_integer(unsigned(o_roi1_sum)) + to_integer(unsigned(o_data0)), o_roi1_sum'length));
-      end if;
-    end if;
-  end process;
+  o_data0 <= data0 when roi0_is_in = '1' else data1;
+  o_data1 <= data1 when roi0_is_in = '1' else data0;
 
 end rtl;
 

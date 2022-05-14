@@ -33,7 +33,8 @@ architecture sim of tb is
   signal i_fsync      : std_logic := '0';
   signal i_lsync      : std_logic := '0';
   signal i_dval       : std_logic := '0';
-  signal i_data       : std_logic_vector(DLEN-1 downto 0):= (others => '0');
+  signal i_data0      : std_logic_vector(DLEN-1 downto 0):= (others => '0');
+  signal i_data1      : std_logic_vector(DLEN-1 downto 0):= (others => '0');
   signal i_roi0_r0    : std_logic_vector(RLEN-1 downto 0):= (others => '0');
   signal i_roi0_c0    : std_logic_vector(CLEN-1 downto 0):= (others => '0');
   signal i_roi0_r1    : std_logic_vector(RLEN-1 downto 0):= (others => '0');
@@ -55,9 +56,9 @@ architecture sim of tb is
   signal o_dval       : std_logic;
   signal o_roi0_done  : std_logic;
   signal o_roi1_done  : std_logic;
-  signal o_data       : std_logic_vector(DLEN-1 downto 0);
+  signal o_data0      : std_logic_vector(DLEN-1 downto 0);
+  signal o_data1      : std_logic_vector(DLEN-1 downto 0);
   signal data_integer : integer := 0;
-
 
 begin
 
@@ -73,7 +74,8 @@ begin
     i_fsync        => i_fsync,       --  in  std_logic;
     i_lsync        => i_lsync,       --  in  std_logic;
     i_dval         => i_dval,        --  in  std_logic;
-    i_data         => i_data,        --  in  std_logic_vector(DLEN-1 downto 0);
+    i_data0        => i_data0,       --  in  std_logic_vector(DLEN-1 downto 0);
+    i_data1        => i_data1,       --  in  std_logic_vector(DLEN-1 downto 0);
     i_roi0_r0      => i_roi0_r0,     --  in  std_logic_vector(RLEN-1 downto 0);
     i_roi0_c0      => i_roi0_c0,     --  in  std_logic_vector(CLEN-1 downto 0);
     i_roi0_r1      => i_roi0_r1,     --  in  std_logic_vector(RLEN-1 downto 0);
@@ -94,7 +96,8 @@ begin
     o_fsync        => o_fsync,       --  out std_logic;
     o_lsync        => o_lsync,       --  out std_logic;
     o_dval         => o_dval,        --  out std_logic;
-    o_data         => o_data         --  out std_logic_vector(DLEN-1 downto 0);
+    o_data0        => o_data0,       --  out std_logic_vector(DLEN-1 downto 0);
+    o_data1        => o_data1        --  out std_logic_vector(DLEN-1 downto 0);
   );
 
   -- generate clocks until test_done is asserted
@@ -166,7 +169,8 @@ begin
         end loop;
         for c in 0 to 639 loop
           i_dval <= '1';
-          i_data <= std_logic_vector( to_unsigned(data_integer, i_data'length));
+          i_data0 <= std_logic_vector( to_unsigned(data_integer, i_data0'length));
+          i_data1 <= std_logic_vector( to_unsigned(data_integer, i_data1'length));
           data_integer <= (data_integer + 1) mod 2**16;
           wait until rising_edge(clk);
           i_fsync <= '0';
