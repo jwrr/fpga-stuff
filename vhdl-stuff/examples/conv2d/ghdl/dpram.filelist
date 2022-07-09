@@ -1,2 +1,0 @@
-filelist="../rtl/dpram.vhd ../test/tb_pkg.vhd ../test/dpram_tb.vhd"
-
