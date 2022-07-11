@@ -1,0 +1,3 @@
+echo "VIEW WAVES"
+gtkwave waves.ghw&
+
