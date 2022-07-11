@@ -21,7 +21,7 @@ fi
 # If 2nd arg is 'clean' then delete work and wave files.
 if [[ "$2" == "clean" || "$#" == "1"  ]]; then
   echo "CLEAN"
-  rm -f work-*.cf *.vcd
+  rm -f work-*.cf waves.*
 fi
 
 # If 2nd arg is 'compile' then analyze and elaborate all files
@@ -34,12 +34,12 @@ fi
 # If 2nd arg is 'sim' then run the simulation
 if [[ "$2" == "sim" || "$#" == "1"  ]]; then
   echo "RUN SIMULATION"
-  ghdl -r --std=08 tb --vcd=waves.vcd
+  ghdl -r --std=08 tb --wave=waves.ghw
 fi
 
 # If the 2nd arg is "waves" then view the waves with GTKWave
 if [[ "$2" == "waves" ]]; then
   echo "VIEW WAVES"
-  gtkwave waves.vcd
+  gtkwave waves.ghw
 fi
 

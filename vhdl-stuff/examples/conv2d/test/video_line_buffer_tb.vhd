@@ -12,15 +12,15 @@ use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 library work;
 use work.tb_pkg.all;
-use work.video_line_buffer_package.all;
+use work.conv2d_package;
 
 entity tb is
 end entity tb;
 
 architecture sim of tb is
   constant NN : integer := 5;
-  constant FW : integer := 256;
-  constant FH : integer := 256;
+  constant FW : integer := 16;
+  constant FH : integer := 16;
   constant PW : integer := 8;
 
   constant CLK_PERIOD      : time := 10 ns;
@@ -36,10 +36,14 @@ architecture sim of tb is
   signal i_rst     : std_logic;
   signal i_frame_v : std_logic;
   signal i_line_v  : std_logic;
+  signal i_pixel_v : std_logic;
   signal i_pixel   : std_logic_vector(PW-1 downto 0);
   signal o_frame_v : std_logic;
   signal o_line_v  : std_logic;
-  signal o_pixels  : video_line_buffer_array(0 to NN-1);
+  signal o_pixels  : conv2d_package.array_of_slv(0 to NN-1);
+  
+  signal i_video_port : work.conv2d_package.video_port;
+  signal o_video_port : work.conv2d_package.video_port;
 
 begin
 
@@ -54,9 +58,11 @@ begin
     PW => PW  -- integer := 8    -- Pixel Width
   )
   port map (
-    i_clk     => i_clk,     -- in  std_logic;
+    i_clk     => clk,       -- in  std_logic;
     i_rst     => i_rst,     -- in  std_logic;
     i_frame_v => i_frame_v, -- in  std_logic;
+    i_video_port => i_video_port,
+    o_video_port => o_video_port,
     i_line_v  => i_line_v,  -- in  std_logic;
     i_pixel   => i_pixel,   -- in  unsigned(PW-1 downto 0);
     o_frame_v => o_frame_v, -- out std_logic;
@@ -82,6 +88,7 @@ begin
   begin
 
     report("reset dut");
+    i_video_port <= conv2d_package.video_port_reset;
 
     i_frame_v <= '0';
     i_line_v <= '0';
@@ -98,7 +105,8 @@ begin
       for row_i in 1 to FH loop
         i_line_v <= '1';
         for col_i in 1 to FW loop
-        i_pixel <= std_logic_vector(  unsigned(i_pixel) + 1);
+          i_video_port <= conv2d_package.video_port_incr(i_video_port);
+          i_pixel <= std_logic_vector(  unsigned(i_pixel) + 1);
           wait until rising_edge(clk);
         end loop;
         i_line_v <= '0';
