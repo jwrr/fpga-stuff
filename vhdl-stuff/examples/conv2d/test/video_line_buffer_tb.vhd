@@ -10,9 +10,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
-library work;
-use work.tb_pkg.all;
-use work.conv2d_package;
+use WORK.tb_pkg;
+use WORK.conv2d_package;
 
 entity tb is
 end entity tb;
@@ -42,15 +41,15 @@ architecture sim of tb is
   signal o_line_v  : std_logic;
   signal o_pixels  : conv2d_package.array_of_slv(0 to NN-1);
   
-  signal i_video_port : work.conv2d_package.video_port;
-  signal o_video_port : work.conv2d_package.video_port;
+  signal i_video_port : WORK.conv2d_package.video_port;
+  signal o_video_port : WORK.conv2d_package.video_port;
 
 begin
 
   i_clk <= clk;
   i_rst <= rst;
 
-  u_video_line_buffer: entity work.video_line_buffer
+  u_video_line_buffer: entity WORK.video_line_buffer
   generic map (
     NN => NN, -- integer := 5;   -- NxN Kernel
     FW => FW, -- integer := 256; -- Frame Width
@@ -88,20 +87,32 @@ begin
   begin
 
     report("reset dut");
-    i_video_port <= conv2d_package.video_port_reset;
 
     i_frame_v <= '0';
     i_line_v <= '0';
     i_pixel <= (others => '0');
-    pulse(rst, clk, 10);
+    tb_pkg.pulse(rst, clk, 10);
 
     report("Disable counter");
 
+    for i in 1 to 100 loop wait until rising_edge(clk); end loop;
+    i_video_port <= conv2d_package.video_port_reset;
     for i in 1 to 10 loop wait until rising_edge(clk); end loop;
+
+
+    for frame_i in 1 to 5 loop
+      report("frame");
+      for pix_i in 1 to 1000 loop
+        i_video_port <= conv2d_package.video_port_incr(i_video_port);
+        tb_pkg.tick(clk);
+      end loop;
+    end loop;
+
 
     for frame_i in 1 to 5 loop
       report("frame");
       i_frame_v <= '1';
+      
       for row_i in 1 to FH loop
         i_line_v <= '1';
         for col_i in 1 to FW loop

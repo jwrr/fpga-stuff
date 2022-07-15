@@ -15,10 +15,12 @@ Simulation
 * Each major block has a testbench.
 
 ```
-  sim.bash filelists/dpram.filelist
-  sim.bash filelists/video_line_buffer.filelist
+  CLEAN
+  
+  RUN filelists/dpram.filelist
+  RUN filelists/video_line_buffer.filelist
 
-  ./sim.bash filelists/dpram.filelist waves
+  VIEW_WAVES
 ```
 
 Design Hierarchy

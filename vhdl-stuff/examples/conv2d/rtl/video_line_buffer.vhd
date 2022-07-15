@@ -9,8 +9,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-library work;
-use work.conv2d_package;
+use WORK.conv2d_package;
 
 entity video_line_buffer is
 generic (
@@ -22,8 +21,8 @@ generic (
 port (
   i_clk        : in  std_logic;
   i_rst        : in  std_logic;
-  i_video_port : in work.conv2d_package.video_port;
-  o_video_port : in work.conv2d_package.video_port;
+  i_video_port : in WORK.conv2d_package.video_port;
+  o_video_port : in WORK.conv2d_package.video_port;
   i_frame_v : in  std_logic;
   i_line_v  : in  std_logic;
   i_pixel   : in  std_logic_vector(PW-1 downto 0);
@@ -61,7 +60,7 @@ begin
 
 
   G_LINE_BUF: for ii in 0 to NN-1 generate
-    u_dpram: entity work.dpram
+    u_dpram: entity WORK.dpram
     generic map (
       DEPTH         => FW,
       AWIDTH        => waddr'length,

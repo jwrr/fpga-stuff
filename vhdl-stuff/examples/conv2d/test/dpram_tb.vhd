@@ -10,8 +10,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
-library work;
-use work.tb_pkg.all;
+use WORK.tb_pkg.all;
 
 entity tb is
 end entity tb;
@@ -45,7 +44,7 @@ architecture sim of tb is
 
 begin
 
-  u_dpram: entity work.dpram
+  u_dpram: entity WORK.dpram
   generic map (
     DEPTH         => DEPTH,
     AWIDTH        => AWIDTH,

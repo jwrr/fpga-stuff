@@ -9,8 +9,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
-library work;
-
 
 package tb_pkg is
   pure function to_slv ( ii : natural; len : integer) return std_logic_vector;
@@ -26,6 +24,7 @@ package tb_pkg is
   procedure wait_re( signal sig : in std_logic; constant cnt : in positive);
   procedure wait_re( signal   sig : in std_logic);
   procedure pulse ( signal sig : inout std_logic; signal clk : in std_logic; constant cnt : positive := 1);
+  procedure tick ( signal clk : in std_logic; constant cnt : positive := 1);
   procedure clkgen (signal clk : out std_logic; signal done : in std_logic; constant period : time := 10 ns);
 end package;
 
@@ -125,6 +124,16 @@ package body tb_pkg is
     wait_re(clk, cnt);
     sig <= not sig;
   end procedure pulse;
+
+  procedure tick (
+    signal   clk : in    std_logic;
+    constant cnt :       positive := 1
+  ) is
+  begin
+    for ii in 1 to cnt loop
+      wait_re(clk, cnt);
+    end loop;
+  end procedure tick;
 
 
   procedure clkgen (

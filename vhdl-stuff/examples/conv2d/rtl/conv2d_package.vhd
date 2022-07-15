@@ -13,9 +13,6 @@ use ieee.std_logic_textio.all;
 use ieee.math_real.log2;
 use ieee.math_real.ceil;
 
-library work;
-
-
 
 --  Clocks Per Pixel        :
 --  Horizontal Sync:         120 Pixels, 1.11782 usec; (line 38)
@@ -44,8 +41,8 @@ package conv2d_package is
   constant VBPORCH : natural := 10;
   constant VACTIVE : natural := 20;
   constant VFPORCH : natural := 10;
-  
-  constant FRAME_WIDTH   : natural := HSYNC + HBPORCH + HACTIVE + HFPORCH;  
+
+  constant FRAME_WIDTH   : natural := HSYNC + HBPORCH + HACTIVE + HFPORCH;
   constant FRAME_HEIGHT  : natural := VSYNC + VBPORCH + VACTIVE + VFPORCH;
   constant ACTIVE_HSTART : natural := HSYNC + HBPORCH;
   constant ACTIVE_HSTOP  : natural := ACTIVE_HSTART + HACTIVE - 1;
@@ -68,21 +65,20 @@ package conv2d_package is
     frame_hcnt  : unsigned(F_HCNT_LEN-1 downto 0);
     frame_vcnt  : unsigned(F_VCNT_LEN-1 downto 0);
     is_active   : std_logic;
+    is_sof      : std_logic;
+    is_sol      : std_logic;
+    is_eof      : std_logic;
+    is_eol      : std_logic;
     active_hcnt : unsigned(A_HCNT_LEN-1 downto 0);
     active_vcnt : unsigned(A_VCNT_LEN-1 downto 0);
   end record video_port;
 
   function unsigned(aslv : array_of_slv) return array_of_unsigned;
   function std_logic_vector(au : array_of_unsigned) return array_of_slv;
+  function sl(i_bool : boolean) return std_logic;
 
   function video_port_reset return video_port;
   function video_port_incr(i_vp : video_port) return video_port;
-
-  function video_port_is_active(i_vp : video_port) return boolean;
-  function video_port_frame_is_sof(i_vp : video_port) return boolean;
-  function video_port_frame_is_sol(i_vp : video_port) return boolean;
-  function video_port_frame_is_eof(i_vp : video_port) return boolean;
-  function video_port_frame_is_eol(i_vp : video_port) return boolean;
 
 end package;
 
@@ -93,13 +89,19 @@ package body conv2d_package is
   begin
     return au;
   end function unsigned;
-  
+
   function std_logic_vector(au : array_of_unsigned) return array_of_slv is
     variable aslv : array_of_slv(au'range);
   begin
     return aslv;
   end function std_logic_vector;
 
+  function sl(i_bool : boolean) return std_logic is
+    variable o_sl : std_logic;
+  begin
+    o_sl := '1' when i_bool else '0';
+    return o_sl;
+  end function sl;
 
   function video_port_reset return video_port is
     variable o_frame : video_port;
@@ -112,14 +114,17 @@ package body conv2d_package is
     o_frame.frame_hcnt  := (others => '0');   -- unsigned(F_HCNT_LEN-1 downto 0);
     o_frame.frame_vcnt  := (others => '0');   -- unsigned(F_VCNT_LEN-1 downto 0);
     o_frame.is_active   := '0';               -- std_logic;
+    o_frame.is_sof      := '1';               -- std_logic;
+    o_frame.is_sol      := '1';               -- std_logic;
+    o_frame.is_eof      := '0';               -- std_logic;
+    o_frame.is_eol      := '0';               -- std_logic;
     o_frame.active_hcnt := (others => '0');   -- unsigned(A_HCNT_LEN-1 downto 0);
     o_frame.active_vcnt := (others => '0');   -- unsigned(A_VCNT_LEN-1 downto 0);
     return o_frame;
   end function video_port_reset;
 
-
   function video_port_incr(i_vp : video_port) return video_port is
-    variable o_vp : video_port; 
+    variable o_vp : video_port;
   begin
     o_vp := i_vp;
     if i_vp.frame_hcnt = FRAME_WIDTH-1 then
@@ -127,84 +132,56 @@ package body conv2d_package is
     else
       o_vp.frame_hcnt := i_vp.frame_hcnt + 1;
     end if;
-    
-    if i_vp.active_hcnt = HACTIVE-1 then
-      if i_vp.active_vcnt = VACTIVE-1  then
-        o_vp.active_vcnt := (others => '0');
+
+
+    if i_vp.frame_hcnt = FRAME_WIDTH-1-1 then
+      if i_vp.frame_vcnt = FRAME_HEIGHT-1  then
+        o_vp.frame_vcnt := (others => '0');
       else
-        o_vp.active_vcnt := i_vp.active_vcnt + 1;
+        o_vp.frame_vcnt := i_vp.frame_vcnt + 1;
       end if;
     end if;
-    o_vp.is_active := '1' when (o_vp.frame_hcnt >= ACTIVE_HSTART) and 
+    o_vp.is_active := '1' when (o_vp.frame_hcnt >= ACTIVE_HSTART) and
                                 (o_vp.frame_hcnt <= ACTIVE_HSTOP) and
-                                (o_vp.frame_vcnt >= ACTIVE_VSTART) and 
+                                (o_vp.frame_vcnt >= ACTIVE_VSTART) and
                                 (o_vp.frame_vcnt <= ACTIVE_VSTOP) else '0';
-    if o_vp.is_active then
-      if i_vp.active_hcnt = HACTIVE-1 then
-        o_vp.active_hcnt := (others => '0');
-      else
-        o_vp.active_hcnt := i_vp.active_hcnt + 1;
-      end if;
-      
-      if i_vp.active_hcnt = HACTIVE-1 then
-        if i_vp.active_vcnt = VACTIVE-1  then
-          o_vp.active_vcnt := (others => '0');
-        else
-          o_vp.active_vcnt := i_vp.active_vcnt + 1;
-        end if;
-      end if;
-    end if;
+
+    o_vp.is_sof := sl((i_vp.frame_hcnt = 0) and (i_vp.frame_vcnt = 0));
+    o_vp.is_eof := sl((i_vp.frame_hcnt = FRAME_WIDTH) and (i_vp.frame_vcnt = FRAME_HEIGHT));
+    o_vp.is_sol := sl(i_vp.frame_hcnt = 0);
+    o_vp.is_eol := sl(i_vp.frame_hcnt = FRAME_WIDTH-1);
+
+
     return o_vp;
+
+--
+--     if i_vp.active_hcnt = HACTIVE-1 then
+--       if i_vp.active_vcnt = VACTIVE-1  then
+--         o_vp.active_vcnt := (others => '0');
+--       else
+--         o_vp.active_vcnt := i_vp.active_vcnt + 1;
+--       end if;
+--     end if;
+--     o_vp.is_active := '1' when (o_vp.frame_hcnt >= ACTIVE_HSTART) and
+--                                 (o_vp.frame_hcnt <= ACTIVE_HSTOP) and
+--                                 (o_vp.frame_vcnt >= ACTIVE_VSTART) and
+--                                 (o_vp.frame_vcnt <= ACTIVE_VSTOP) else '0';
+--     if o_vp.is_active then
+--       if i_vp.active_hcnt = HACTIVE-1 then
+--         o_vp.active_hcnt := (others => '0');
+--       else
+--         o_vp.active_hcnt := i_vp.active_hcnt + 1;
+--       end if;
+--
+--       if i_vp.active_hcnt = HACTIVE-1 then
+--         if i_vp.active_vcnt = VACTIVE-1  then
+--           o_vp.active_vcnt := (others => '0');
+--         else
+--           o_vp.active_vcnt := i_vp.active_vcnt + 1;
+--         end if;
+--       end if;
+--     end if;
+--     return o_vp;
   end function video_port_incr;
-
-
-  function video_port_is_active(i_vp : video_port) return boolean is
-    variable is_active : boolean;
-  begin
-    is_active := (i_vp.frame_hcnt >= ACTIVE_HSTART) and 
-                 (i_vp.frame_hcnt <= ACTIVE_HSTOP) and
-                 (i_vp.frame_vcnt >= ACTIVE_VSTART) and 
-                 (i_vp.frame_vcnt <= ACTIVE_VSTOP);
-    return is_active;
-  end function video_port_is_active;
-
-
-  function video_port_frame_is_sof(i_vp : video_port) return boolean is
-    variable sof : boolean;
-  begin
-    sof := (i_vp.frame_hcnt = 0) and
-           (i_vp.frame_vcnt = 0);
-    return sof;
-  end function video_port_frame_is_sof;
-
-
-  function video_port_frame_is_sol(i_vp : video_port) return boolean is
-    variable sof : boolean;
-  begin
-    sof := (i_vp.frame_hcnt = 0);
-    return sof;
-  end function video_port_frame_is_sol;
-
-
-  function video_port_frame_is_eof(i_vp : video_port) return boolean is
-    variable eof : boolean;
-  begin
-    eof := (i_vp.frame_hcnt = FRAME_WIDTH) and
-           (i_vp.frame_vcnt = FRAME_HEIGHT);
-    return eof;
-  end function video_port_frame_is_eof;
-
-
-  function video_port_frame_is_eol(i_vp : video_port) return boolean is
-    variable eof : boolean;
-  begin
-    eof := (i_vp.frame_hcnt = FRAME_WIDTH);
-    return eof;
-  end function video_port_frame_is_eol;
-
-
-
-
-
 
 end package body;

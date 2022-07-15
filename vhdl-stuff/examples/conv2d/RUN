@@ -15,7 +15,6 @@ fi
 # will be run.
 if [[ "$#" == "1"  ]]; then
   echo "Running steps 'clean', 'compile' and 'sim'"
-  echo "Use '$0 waves' to view simulaton waveform"
 fi
 
 # If 2nd arg is 'clean' then delete work and wave files.
