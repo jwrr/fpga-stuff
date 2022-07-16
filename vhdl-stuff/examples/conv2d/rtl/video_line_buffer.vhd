@@ -9,7 +9,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use WORK.conv2d_package;
+use WORK.vid_pack;
 
 entity video_line_buffer is
 generic (
@@ -21,14 +21,14 @@ generic (
 port (
   i_clk        : in  std_logic;
   i_rst        : in  std_logic;
-  i_video_port : in WORK.conv2d_package.video_port;
-  o_video_port : in WORK.conv2d_package.video_port;
+  i_video_port : in WORK.vid_pack.video_port;
+  o_video_port : in WORK.vid_pack.video_port;
   i_frame_v : in  std_logic;
   i_line_v  : in  std_logic;
   i_pixel   : in  std_logic_vector(PW-1 downto 0);
   o_frame_v : out std_logic;
   o_line_v  : out std_logic;
-  o_pixels  : out conv2d_package.array_of_slv(0 to NN-1)
+  o_pixels  : out vid_pack.array_of_slv(0 to NN-1)
 );
 end entity video_line_buffer;
 
@@ -54,7 +54,7 @@ architecture rtl of video_line_buffer is
   signal rcol         : unsigned(CW downto 0);
   signal raddr        : std_logic_vector(wcol'range);
   signal read         : std_logic;
-  signal rdata        : conv2d_package.array_of_slv(0 to NN-1); --  std_logic_vector(i_pixel'range);
+  signal rdata        : vid_pack.array_of_slv(0 to NN-1); --  std_logic_vector(i_pixel'range);
   signal rdata_v      : std_logic;
 begin
 

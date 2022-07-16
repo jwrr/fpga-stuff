@@ -1,6 +1,6 @@
 filelist=" \
 rtl/dpram.vhd \
-rtl/conv2d_package.vhd \
+rtl/vid_pack.vhd \
 rtl/video_line_buffer.vhd \
 test/tb_pkg.vhd \
 test/video_line_buffer_tb.vhd"

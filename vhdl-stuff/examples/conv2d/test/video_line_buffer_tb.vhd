@@ -11,7 +11,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 use WORK.tb_pkg;
-use WORK.conv2d_package;
+use WORK.vid_pack;
 
 entity tb is
 end entity tb;
@@ -39,10 +39,10 @@ architecture sim of tb is
   signal i_pixel   : std_logic_vector(PW-1 downto 0);
   signal o_frame_v : std_logic;
   signal o_line_v  : std_logic;
-  signal o_pixels  : conv2d_package.array_of_slv(0 to NN-1);
+  signal o_pixels  : vid_pack.array_of_slv(0 to NN-1);
   
-  signal i_video_port : WORK.conv2d_package.video_port;
-  signal o_video_port : WORK.conv2d_package.video_port;
+  signal i_video_port : WORK.vid_pack.video_port;
+  signal o_video_port : WORK.vid_pack.video_port;
 
 begin
 
@@ -96,35 +96,13 @@ begin
     report("Disable counter");
 
     for i in 1 to 100 loop wait until rising_edge(clk); end loop;
-    i_video_port <= conv2d_package.video_port_reset;
+    i_video_port <= vid_pack.video_port_reset;
     for i in 1 to 10 loop wait until rising_edge(clk); end loop;
 
 
-    for frame_i in 1 to 5 loop
-      report("frame");
-      for pix_i in 1 to 1000 loop
-        i_video_port <= conv2d_package.video_port_incr(i_video_port);
-        tb_pkg.tick(clk);
-      end loop;
-    end loop;
-
-
-    for frame_i in 1 to 5 loop
-      report("frame");
-      i_frame_v <= '1';
-      
-      for row_i in 1 to FH loop
-        i_line_v <= '1';
-        for col_i in 1 to FW loop
-          i_video_port <= conv2d_package.video_port_incr(i_video_port);
-          i_pixel <= std_logic_vector(  unsigned(i_pixel) + 1);
-          wait until rising_edge(clk);
-        end loop;
-        i_line_v <= '0';
-        for line_gap_i in 1 to 50 loop wait until rising_edge(clk); end loop;
-      end loop;
-      i_frame_v <= '0';
-      for frame_gap_i in 1 to 2000 loop wait until rising_edge(clk); end loop;
+    for pix_i in 1 to 20000 loop
+      i_video_port <= vid_pack.video_port_incr(i_video_port);
+      tb_pkg.tick(clk);
     end loop;
 
     for i in 1 to 1000 loop wait until rising_edge(clk); end loop;
