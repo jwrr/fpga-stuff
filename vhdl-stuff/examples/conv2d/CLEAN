@@ -1,3 +1,0 @@
-echo "CLEAN"
-rm -f work-*.cf waves.*
-

@@ -21,14 +21,14 @@ generic (
 port (
   i_clk        : in  std_logic;
   i_rst        : in  std_logic;
-  i_video_port : in WORK.vid_pack.video_port;
-  o_video_port : in WORK.vid_pack.video_port;
-  i_frame_v : in  std_logic;
-  i_line_v  : in  std_logic;
-  i_pixel   : in  std_logic_vector(PW-1 downto 0);
-  o_frame_v : out std_logic;
-  o_line_v  : out std_logic;
-  o_pixels  : out vid_pack.array_of_slv(0 to NN-1)
+  i_vport      : in  vid_pack.vport;
+  o_vport      : in  vid_pack.vport;
+  i_frame_v    : in  std_logic;
+  i_line_v     : in  std_logic;
+  i_pixel      : in  std_logic_vector(PW-1 downto 0);
+  o_frame_v    : out std_logic;
+  o_line_v     : out std_logic;
+  o_pixels     : out vid_pack.array_of_slv(0 to NN-1)
 );
 end entity video_line_buffer;
 

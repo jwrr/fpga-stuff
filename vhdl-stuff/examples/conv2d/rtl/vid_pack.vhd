@@ -32,11 +32,11 @@ package vid_pack is
 
   constant BPP     : natural := 8;   -- Bits Per Pixel
   constant CPP     : natural := 4;   -- Clocks Per Pixel
-  constant HSYNC   : natural := 1;
-  constant HBPORCH : natural := 10;
+  constant HSYNC   : natural := 1;   -- 1 pixel
+  constant HBPORCH : natural := 9;  
   constant HACTIVE : natural := 20;
   constant HFPORCH : natural := 10;
-  constant VSYNC   : natural := 1;  -- 1 line
+  constant VSYNC   : natural := 1;   -- 1 line
   constant VBPORCH : natural := 9;
   constant VACTIVE : natural := 20;
   constant VFPORCH : natural := 10;
@@ -57,7 +57,7 @@ package vid_pack is
   type array_of_slv is array(integer range <>) of std_logic_vector(BPP-1 downto 0);
   type array_of_unsigned is array(integer range <>) of unsigned(BPP-1 downto 0);
 
-  type video_port is record
+  type vport is record
     active_v      : std_logic;
     frame_v       : std_logic;
     line_v        : std_logic;
@@ -78,14 +78,14 @@ package vid_pack is
     active_eol    : std_logic;
     inactive_sol  : std_logic;
     inactive_eol  : std_logic;
-  end record video_port;
+  end record vport;
 
   function unsigned(aslv : array_of_slv) return array_of_unsigned;
   function std_logic_vector(au : array_of_unsigned) return array_of_slv;
   function sl(i_bool : boolean) return std_logic;
 
-  function video_port_reset return video_port;
-  function video_port_incr(i_vp : video_port) return video_port;
+  function vport_reset return vport;
+  function vport_incr(i_vp : vport) return vport;
 
 end package;
 
@@ -110,8 +110,8 @@ package body vid_pack is
     return o_sl;
   end function sl;
 
-  function video_port_reset return video_port is
-    variable o_frame : video_port;
+  function vport_reset return vport is
+    variable o_frame : vport;
   begin
     o_frame.frame_v      := '0';
     o_frame.line_v       := '0';
@@ -135,10 +135,10 @@ package body vid_pack is
     o_frame.inactive_eol := '0';               -- std_logic;
     o_frame.pix_cnt      := (others => '0');   -- unsigned(CPP-1 downto 0);
     return o_frame;
-  end function video_port_reset;
+  end function vport_reset;
 
-  function video_port_incr(i_vp : video_port) return video_port is
-    variable o_vp : video_port;
+  function vport_incr(i_vp : vport) return vport is
+    variable o_vp : vport;
     variable var_hactive : boolean;
     variable var_vactive : boolean;
     variable var_active  : boolean;
@@ -216,6 +216,6 @@ package body vid_pack is
     o_vp.frame_v := sl(var_vactive);
 
     return o_vp;
-  end function video_port_incr;
+  end function vport_incr;
 
 end package body;

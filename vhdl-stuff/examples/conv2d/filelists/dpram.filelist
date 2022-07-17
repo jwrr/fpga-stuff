@@ -1,5 +1,5 @@
 filelist=" \
 rtl/dpram.vhd \
-test/tb_pkg.vhd \
+test/test_pack.vhd \
 test/dpram_tb.vhd"
 

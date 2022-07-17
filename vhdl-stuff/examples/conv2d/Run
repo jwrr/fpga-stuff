@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+# Bash script to run GHDL simulation
+# Clean, Compile and Run Simulation
+
+# If arg is valid file then save as LATEST and source it
+if [[ "$#" == "1"  ]]; then
+  if [[ -f "$1" ]]; then
+    
+    # Touch the LATEST to ensure it exists, otherwise diff might fail
+    touch filelists/LATEST.filelist
+    
+    # Save the filelist if it different from the LATEST
+    DIFF=$(diff $1 filelists/LATEST.filelist)
+    if [[ "$DIFF" == "" ]]; then
+      echo "USING filelists/LATEST.filelist"
+    else
+      echo "UPDATING filelists/LATEST.filelist"
+      cp $1 filelists/LATEST.filelist
+    fi
+    
+    # source the filelist. This creates '$filelist', which is a list of files
+    source filelists/LATEST.filelist
+  else
+    echo "Error: File does not exist - $1"
+  fi
+
+# If no arg then use the LATEST if it exists
+else
+  if [[ -f "filelists/LATEST.filelist" ]]; then
+    echo "USING filelists/LATEST.filelist"
+    source filelists/LATEST.filelist
+  else
+    echo "Example: $0 filelists/dpram.filelist"
+  fi
+fi
+
+# Compile and sim if the filelist has been defined
+if [[ -n "$filelist" ]]; then
+
+  echo "CLEAN"
+  rm -f work-*.cf waves.*
+
+  # Analyze and Elaborate the VHDL test and design
+  echo "COMPILE DESIGN"
+  ghdl -a --std=08 $filelist
+  ghdl -e --std=08 tb
+
+  echo "RUN SIMULATION"
+  ghdl -r --std=08 tb --wave=waves.ghw
+fi
+

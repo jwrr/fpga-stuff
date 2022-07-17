@@ -5,12 +5,13 @@
 --
 --------------------------------------------------------------------------------
 -- library std.textio.all;
+use STD.textio.all;
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 
-package tb_pkg is
+package test_pack is
   pure function to_slv ( ii : natural; len : integer) return std_logic_vector;
   procedure set_sl ( signal sl : inout std_logic; constant val : natural := 1);
   procedure set_slv ( signal slv : inout std_logic_vector; constant val : natural := 1);
@@ -25,10 +26,15 @@ package tb_pkg is
   procedure wait_re( signal   sig : in std_logic);
   procedure pulse ( signal sig : inout std_logic; signal clk : in std_logic; constant cnt : positive := 1);
   procedure tick ( signal clk : in std_logic; constant cnt : positive := 1);
+  procedure tick_falling ( signal clk : in std_logic; constant cnt : positive := 1);
   procedure clkgen (signal clk : out std_logic; signal done : in std_logic; constant period : time := 10 ns);
+
+  impure function test(pass : boolean; str : string; print_all : boolean := false) return boolean;
+  procedure msg (str : string);
+
 end package;
 
-package body tb_pkg is
+package body test_pack is
 
   pure function to_slv ( ii : natural; len : integer) return std_logic_vector is
   begin
@@ -136,6 +142,17 @@ package body tb_pkg is
   end procedure tick;
 
 
+  procedure tick_falling (
+    signal   clk : in    std_logic;
+    constant cnt :       positive := 1
+  ) is
+  begin
+    for i in 1 to cnt loop
+      wait until falling_edge(clk);
+    end loop;
+  end procedure tick_falling;
+
+
   procedure clkgen (
     signal   clk    : out   std_logic;
     signal   done   : in    std_logic;
@@ -152,5 +169,33 @@ package body tb_pkg is
     wait;
   end procedure clkgen;
     
+  impure function test(pass : boolean; str : string; print_all : boolean := false) return boolean is
+    variable outline : line;
+  begin
+    if print_all or not pass then
+      write(outline, now, right, 12);
+      write(outline, string'(": "));
+      if not pass then
+        write(outline, string'("FAIL"));
+      else
+        write(outline, string'("PASS"));
+      end if;
+      write(outline, string'(" - "));
+      write(outline, str);
+      writeline(output, outline);
+    end if;
+    return pass;
+  end function test;
+
+  procedure msg (str : string) is
+    variable outline : line;
+  begin
+    write(outline, now, right, 12);
+    write(outline, string'(": "));
+    write(outline, string'("    "));
+    write(outline, string'(" - "));
+    write(outline, str);
+    writeline(output, outline);
+  end procedure msg;
 
 end package body;

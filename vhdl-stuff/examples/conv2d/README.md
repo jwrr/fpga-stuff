@@ -12,15 +12,17 @@ Simulation
 ----------
 * Simulations use [GHDL](http://ghdl.free.fr/) [github](https://github.com/ghdl/ghdl).
 * The waveform viewer is [GTLWave](http://gtkwave.sourceforge.net/) [github](https://github.com/gtkwave/gtkwave).
-* Each major block has a testbench.
+* Each test has a filelist (in the filelists folder)
+* You can re-run a test with just 'Run' without the filelist
 
 ```
-  CLEAN
-  
-  RUN filelists/dpram.filelist
-  RUN filelists/video_line_buffer.filelist
 
-  VIEW_WAVES
+  Run filelists/dpram.filelist
+            or
+  Run filelists/video_line_buffer.filelist
+
+  View_waves
+
 ```
 
 Design Hierarchy
