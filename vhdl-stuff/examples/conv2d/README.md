@@ -10,8 +10,8 @@ Far from done. Most blocks are tbd.
 
 Simulation
 ----------
-* Simulations use [GHDL](http://ghdl.free.fr/) [github](https://github.com/ghdl/ghdl).
-* The waveform viewer is [GTLWave](http://gtkwave.sourceforge.net/) [github](https://github.com/gtkwave/gtkwave).
+* Simulations use [GHDL](http://ghdl.free.fr/) - [github](https://github.com/ghdl/ghdl).
+* The waveform viewer is [GTLWave](http://gtkwave.sourceforge.net/) - [github](https://github.com/gtkwave/gtkwave).
 * Each test has a filelist (in the filelists folder)
 * You can re-run a test with just 'Run' without the filelist
 

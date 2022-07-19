@@ -1,4 +1,3 @@
-
 --------------------------------------------------------------------------------
 -- Block:
 -- Description:
@@ -48,7 +47,9 @@ begin
     elsif rising_edge(i_clk_read) then
       o_rdata_v <= i_read;
       if i_read = '1' then
-        o_rdata <= ram_array( to_integer(unsigned(i_raddr)) );
+        if unsigned(i_raddr) < DEPTH then
+          o_rdata <= ram_array( to_integer(unsigned(i_raddr)) );
+        end if;
       end if;
     end if;
   end process;
@@ -57,7 +58,9 @@ begin
   begin
     if rising_edge(i_clk_write) then
       if i_write = '1' then
-        ram_array( to_integer(unsigned(i_waddr)) ) <= i_wdata;
+        if unsigned(i_raddr) < DEPTH then
+          ram_array( to_integer(unsigned(i_waddr)) ) <= i_wdata;
+        end if;
       end if;
     end if;
   end process;

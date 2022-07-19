@@ -61,14 +61,17 @@ package vid_pack is
     active_v      : std_logic;
     frame_v       : std_logic;
     line_v        : std_logic;
+    line_early_v  : std_logic;
     pix_v         : std_logic;
-    pix_cnt       : unsigned(BPP-1 downto 0);
+    pix           : unsigned(BPP-1 downto 0);
+    pix_cnt       : unsigned(3 downto 0);
     frame_hcnt    : unsigned(F_HCNT_LEN-1 downto 0);
     frame_vcnt    : unsigned(F_VCNT_LEN-1 downto 0);
     frame_sof     : std_logic;
     frame_sol     : std_logic;
     frame_eof     : std_logic;
     frame_eol     : std_logic;
+    frame_pix_v   : std_logic;
     active_hcnt   : unsigned(A_HCNT_LEN-1 downto 0);
     active_vcnt   : unsigned(A_VCNT_LEN-1 downto 0);
     is_active     : std_logic;
@@ -115,9 +118,11 @@ package body vid_pack is
   begin
     o_frame.frame_v      := '0';
     o_frame.line_v       := '0';
+    o_frame.line_early_v := '0';
     o_frame.active_v     := '0';
     o_frame.pix_v        := '0';
-    o_frame.pix_cnt      := (others => '0');
+    o_frame.frame_pix_v  := '0';
+    o_frame.pix          := (others => '0');
     o_frame.frame_hcnt   := (others => '0');   -- unsigned(F_HCNT_LEN-1 downto 0);
     o_frame.frame_vcnt   := (others => '0');   -- unsigned(F_VCNT_LEN-1 downto 0);
     o_frame.frame_sof    := '1';               -- std_logic;
@@ -138,16 +143,19 @@ package body vid_pack is
   end function vport_reset;
 
   function vport_incr(i_vp : vport) return vport is
-    variable o_vp : vport;
+    variable o_vp        : vport;
     variable var_hactive : boolean;
+    variable var_hactive_early : boolean;
     variable var_vactive : boolean;
     variable var_active  : boolean;
+    variable var_active_early  : boolean;
+    variable var_frame_pix_v : boolean;
     variable var_pix_v   : boolean;
   begin
     
     o_vp := i_vp;
 
-    var_pix_v := i_vp.pix_cnt = 0;
+    var_frame_pix_v := i_vp.pix_cnt = 0;
     if (CPP = 1) then
       o_vp.pix_cnt := (others => '0');
     elsif i_vp.pix_cnt = CPP-1 then
@@ -156,9 +164,10 @@ package body vid_pack is
       o_vp.pix_cnt := i_vp.pix_cnt + 1;
     end if;
 
-    o_vp.pix_v := sl(var_pix_v);
+    o_vp.frame_pix_v := sl(var_frame_pix_v);
+    o_vp.pix_v       := sl((i_vp.line_early_v = '1') and var_frame_pix_v);
 
-    if not var_pix_v then
+    if not var_frame_pix_v then
       return o_vp;
     end if;    
 
@@ -177,8 +186,10 @@ package body vid_pack is
     end if;
 
     var_hactive := (i_vp.frame_hcnt >= ACTIVE_HSTART) and (i_vp.frame_hcnt <= ACTIVE_HSTOP);
+    var_hactive_early := (i_vp.frame_hcnt >= ACTIVE_HSTART-1) and (i_vp.frame_hcnt <= ACTIVE_HSTOP-1);
     var_vactive := (i_vp.frame_vcnt >= ACTIVE_VSTART) and (i_vp.frame_vcnt <= ACTIVE_VSTOP);
     var_active  := var_hactive and var_vactive;
+    var_active_early  := var_hactive_early and var_vactive;
 
     o_vp.is_active := sl(var_active);
     o_vp.frame_sof := sl((i_vp.frame_hcnt = 0) and (i_vp.frame_vcnt = 0));
@@ -205,14 +216,19 @@ package body vid_pack is
       o_vp.active_hcnt := (others => '0');
     end if;
 
-    o_vp.active_sof := sl((i_vp.frame_hcnt = ACTIVE_HSTART) and (i_vp.frame_vcnt = ACTIVE_VSTART));
+    o_vp.active_sof := sl((i_vp.frame_hcnt = ACTIVE_HSTART-1) and (i_vp.frame_vcnt = ACTIVE_VSTART));
     o_vp.active_eof := sl((i_vp.frame_hcnt = ACTIVE_HSTOP) and (i_vp.frame_vcnt = ACTIVE_VSTOP));
-    o_vp.active_sol := sl(i_vp.frame_hcnt = ACTIVE_HSTART and var_active);
-    o_vp.active_eol := sl(i_vp.frame_hcnt = ACTIVE_HSTOP and var_active);
-    o_vp.inactive_sol := sl(i_vp.frame_hcnt = ACTIVE_HSTART and not var_active);
-    o_vp.inactive_eol := sl(i_vp.frame_hcnt = ACTIVE_HSTOP and not var_active);
+    
+    -- sol and eol are one pixel before the actual first and last pixel of line
+    o_vp.active_sol := sl(i_vp.frame_hcnt = ACTIVE_HSTART-1 and var_vactive);
+    o_vp.active_eol := sl(i_vp.frame_hcnt = ACTIVE_HSTOP-1 and var_vactive);
+    
+    -- The inactive lines may be useful to maintain timing when a block delays image
+    o_vp.inactive_sol := sl(i_vp.frame_hcnt = ACTIVE_HSTART-1 and not var_vactive);
+    o_vp.inactive_eol := sl(i_vp.frame_hcnt = ACTIVE_HSTOP-1 and not var_vactive);
 
     o_vp.line_v  := sl(var_active);
+    o_vp.line_early_v  := sl(var_active_early);
     o_vp.frame_v := sl(var_vactive);
 
     return o_vp;
