@@ -22,9 +22,9 @@ architecture sim of tb is
   constant FRAME_WIDTH  : natural := 40;
   constant FRAME_HEIGHT : natural := 40;
   constant KSIZE : integer := 5;
-  constant FW : integer := 16;
-  constant FH : integer := 16;
-  constant PIXLEN : integer := 8;
+  constant FW : integer := vid_pack.ACTIVE_WIDTH;
+  constant FH : integer := vid_pack.ACTIVE_HEIGHT;
+  constant PWID : integer := 8;
 
   constant CLK_PERIOD      : time := 10 ns;
   constant CLK_HALF_PERIOD : time := CLK_PERIOD / 2;
@@ -41,7 +41,7 @@ architecture sim of tb is
   signal i_frame_v : std_logic;
   signal i_line_v  : std_logic;
   signal i_pixel_v : std_logic;
-  signal i_pixel   : std_logic_vector(PIXLEN-1 downto 0);
+  signal i_pixel   : std_logic_vector(PWID-1 downto 0);
   signal o_frame_v : std_logic;
   signal o_line_v  : std_logic;
   signal o_pixels  : vid_pack.array_of_slv(0 to KSIZE-1);
@@ -90,7 +90,7 @@ begin
     KSIZE  => KSIZE, -- integer := 5;   -- NxN Kernel
     FW     => FW,    -- integer := 256; -- Frame Width
     FH     => FH,    -- integer := 256; -- Frame Height
-    PIXLEN => PIXLEN -- integer := 8    -- Pixel Width
+    PWID => PWID -- integer := 8    -- Pixel Width
   )
   port map (
     i_clk => clk,    -- in  std_logic;
