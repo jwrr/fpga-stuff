@@ -1,0 +1,6 @@
+ghdl -a --std=08 \
+timer.vhd \
+tb_pkg.vhd \
+tb_timer.vhd
+
+ghdl -e --std=08 tb
