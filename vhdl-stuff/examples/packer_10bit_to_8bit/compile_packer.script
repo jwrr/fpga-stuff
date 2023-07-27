@@ -1,0 +1,6 @@
+ghdl -a --std=08 \
+packer.vhd \
+tb_pkg.vhd \
+tb_packer.vhd
+
+ghdl -e --std=08 tb
