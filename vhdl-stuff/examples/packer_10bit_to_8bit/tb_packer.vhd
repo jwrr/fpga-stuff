@@ -92,7 +92,7 @@ begin
       end loop;
     end procedure wait_rex;
 
-    variable packer : pack_t;
+    variable packer : packer_t;
 
   begin
 
@@ -104,10 +104,10 @@ begin
 
     report("Reset Packer");
     packer.reset;
-    for i in 1 to 1023 loop
-      packer.push(i);
+    for i in 1 to 20 loop
+      packer.push_10bits(16#300#);
       wait until rising_edge(apb_clk);
-      packer_i <= packer.pull;
+      packer_i <= packer.pull_8bits;
       wait until rising_edge(apb_clk);
     end loop;
 
