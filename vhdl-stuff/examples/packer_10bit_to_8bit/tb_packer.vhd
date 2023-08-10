@@ -93,16 +93,19 @@ begin
     end procedure wait_rex;
 
     variable packer : packer_t;
+    variable test : test_t;
 
   begin
+    
+    test.start;
 
-    report("reset dut");
+    test.note("RESET DUTG");
 
     apb_resetn <= '0';
     for i in 1 to 10 loop wait until rising_edge(apb_clk); end loop;
     apb_resetn <= '1';
 
-    report("Reset Packer");
+    test.note("RESET PACKER");
     packer.reset;
     for i in 1 to 20 loop
       packer.push_10bits(16#300#);
@@ -111,37 +114,39 @@ begin
       wait until rising_edge(apb_clk);
     end loop;
 
-      wait until rising_edge(apb_clk);
-      packer_i <= 16#5555#;
-      wait until rising_edge(apb_clk);
-    report("Test Packers");
+    wait until rising_edge(apb_clk);
+    packer_i <= 16#5555#;
+    wait until rising_edge(apb_clk);
+    test.note("TEST PACKERS");
     
     
 
-    report("End Packer Test");
+    test.note("END PACKER TEST");
 
 
-    report("Disable timer");
+    test.note("DISABLE TIMER");
 
     for i in 1 to 10 loop wait until rising_edge(apb_clk); end loop;
 
-    report("Increment timer");
+    test.note("Increment timer");
 
     for i in 1 to 1000 loop wait until rising_edge(apb_clk); end loop;
 
-    report("Clear timer");
+    test.note("Clear timer");
     for i in 1 to 100 loop wait until rising_edge(apb_clk); end loop;
 
-    report("Increment timer Again");
+    test.note("Increment timer Again");
 
     for i in 1 to 1000 loop wait until rising_edge(apb_clk); end loop;
 
-    report("Disable timer");
+    test.note("Disable timer");
 
     for i in 1 to 1000 loop wait until rising_edge(apb_clk); end loop;
 
-    report("test done"); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
+    test.note("test done"); -- severity NOTE, WARNING, ERROR, FAILURE (NOTE is default)
     test_done <= '1';
+    test.done;
+
     wait;
   end process main_test;
 

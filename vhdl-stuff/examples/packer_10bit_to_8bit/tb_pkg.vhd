@@ -39,6 +39,7 @@ package tb_pkg is
     procedure level(lvl : natural);
     procedure msg(lvl : natural; m : string);
     procedure dbg(m : string);
+    procedure note(m : string);
     procedure warn(m : string);
     procedure error(m : string);
     procedure test(a : std_logic_vector; e : std_logic_vector; m : string);
@@ -197,7 +198,7 @@ package body tb_pkg is
   type test_t is protected body
     variable test_count : natural := 0;
     variable fail_count : natural := 0;
-    variable test_level : natural := 2; -- DBG=0, PASS=1, FAIL=2, FINAL=3
+    variable test_level : natural := 2; -- DBG=0, PASS=1, NOTE=2, FAIL=3, FINAL=4
 
     procedure start is
     begin
@@ -215,9 +216,9 @@ package body tb_pkg is
     procedure done is
     begin
       if fail_count = 0 then
-        report("TEST FAILED -- " & to_string(fail_count) & " of " & to_string(test_count) & " failed.");
-      else
         report("TEST PASSED -- All " & to_string(test_count) & " tests passed.");
+      else
+        report("TEST FAILED -- " & to_string(fail_count) & " of " & to_string(test_count) & " failed.");
       end if;
     end procedure done;
 
@@ -230,6 +231,11 @@ package body tb_pkg is
     begin
       msg(0, m);
     end procedure dbg;
+
+    procedure note(m : string) is
+    begin
+      msg(1, m);
+    end procedure note;
 
     procedure warn(m : string) is
     begin
@@ -245,7 +251,7 @@ package body tb_pkg is
     begin
       test_count := test_count + 1;
       if a /= e then
-        fail_count = fail_count + 1;
+        fail_count := fail_count + 1;
         report("FAIL: " & "Actual = 0x" & to_hstring(a) & " Expect = 0x" & to_hstring(e) & " -- " & m);
       elsif test_level <= 1 then
         report("pass: " & "Actual = 0x" & to_hstring(a) & " Expect = 0x" & to_hstring(e) & " -- " & m);
