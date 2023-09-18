@@ -1,0 +1,3 @@
+### ghdl -r  --std=08 tb --wave=waves.ghw
+ghdl -r  --std=08 tb --vcd=waves.vcd
+
